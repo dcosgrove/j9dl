@@ -6,7 +6,7 @@ var app = express();
 
 
 var config = {
-	port: 8005
+	port: process.env.PORT || 8000
 };
 
 //app.use('/', router);
