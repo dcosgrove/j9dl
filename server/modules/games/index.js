@@ -92,6 +92,26 @@ module.exports = function(db) {
 		});
 	};
 
+	var joinGame = function(game, player) {
+		
+		// TODO - more restrictions here
+		return Game.findById(game)
+		.then(function(game) {
+			game.players.push(player);
+			return game.save()
+			.then(function(game) {
+				return User.findById(player)
+				.then(function(user) {
+					user.currentGame = game.id;
+					return user.save();
+				})
+				.then(function() {
+					return game;
+				});
+			});
+		});
+	}
+
 	return {
 
 		create: function(req, res, next) {
@@ -147,6 +167,34 @@ module.exports = function(db) {
 			})
 			.then(function() {
 				res.status(200).json({});
+			}, function(err) {
+				next(err);
+			});
+		},
+
+		join: function(req, res, next) {
+
+			if(!req.session.user) {
+				next(new Error('Must be logged in'));
+			}
+
+			return User.findById(req.session.user)
+			.then(function(user) {
+
+				console.log(user);
+				if(user.currentGame) {
+					// move player out of current game if they're in one
+					// consider making this an error in the future				
+					return removePlayer(user.id);
+				}
+			})
+			.then(function() {
+				return joinGame(req.params.id, req.session.user);
+			})
+			.then(function(game) {
+				res.status(200).json({
+					game: game
+				});
 			}, function(err) {
 				next(err);
 			});
