@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var _ = require('lodash');
 
 // games
 module.exports = function(db) {
@@ -12,8 +13,7 @@ module.exports = function(db) {
 		},
 		players: { 
 			type: [ db.Schema.ObjectId ],
-			ref: 'User',
-			required: true
+			ref: 'User'
 		},
 		createdAt: {
 			type: Date,
@@ -55,7 +55,43 @@ module.exports = function(db) {
 				mode: fields.mode
 			});
 
-			return game.save();
+			return game.save()
+			.then(function(game) {
+				creator.currentGame = game.id;
+
+				return creator.save();
+			});
+		});
+	};
+
+	var removePlayer = function(player) {
+
+		return User.findById(player)
+		.then(function(user) {
+			return Game.findById(user.currentGame)
+			.then(function(game) {
+
+				if(!game) {
+					throw new Error('User not in a game');
+				}
+
+				game.players.remove(player);
+				return game.save();
+			})
+			.then(function() {
+				user.currentGame = null;
+				return user.save();
+			})
+		})
+	};
+
+	var abortGame = function(game) {
+
+		return Promise.all(_.map(game.players, function(player) {
+			return removePlayer(player.id);
+		}))
+		.then(function() {
+			return Game.findByIdAndRemove(game.id);
 		});
 	};
 
@@ -64,19 +100,47 @@ module.exports = function(db) {
 		create: function(req, res, next) {
 				
 			if(!req.session.user) {
-				throw new Error('Must be logged in to create a game');
+				throw new Error('Must be logged in');
 			}
 
 			var fields = req.body || {};
 			fields.creator = req.session.user;
 			
-			create(fields)
-			.then(function(game) {
-
-				req.session.currentGame = game.id;
+			return create(fields)
+			.then(function() {
 				res.status(201).json({});
 			}, function(err) {
 				next(err);
+			});
+		},
+
+		withdraw: function(req, res, next) {
+
+			if(!req.session.user) {
+				throw new Error('Must be logged in');
+			}
+
+			return removePlayer(req.session.user)
+			.then(function() {
+				res.status(200).json({});
+			}, function(err) {
+				next(err);
+			});
+		},
+
+		abort: function(req, res, next) {
+			
+			if(!req.session.user) {
+				throw new Error('Must be logged in');
+			}
+
+			return Game.findById(req.params.id)
+			.then(function(game) {
+				if (game.creator == req.session.user) {
+					return abortGame(game);
+				} else {
+					throw new Error('Authorization error');
+				}
 			});
 		},
 
@@ -90,6 +154,18 @@ module.exports = function(db) {
 				}
 
 				res.status(200).json(game);
+			})
+			.catch(function(err) {
+				next(err);
+			})
+		},
+
+
+		list: function(req, res, next) {
+
+			return Game.find()
+			.then(function(games) {
+				res.status(200).json(games);
 			})
 			.catch(function(err) {
 				next(err);

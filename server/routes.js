@@ -10,7 +10,11 @@ module.exports = function(modules) {
 			router.get('/users/:id', modules.users.get);
 
 			router.post('/games', modules.games.create);
+			router.get('/games', modules.games.list);
 			router.get('/games/:id', modules.games.get);
+			router.delete('/games/:id/user', modules.games.withdraw);
+			router.delete('/games/:id', modules.games.abort);
+
 		}
 	}
 }

@@ -32,6 +32,10 @@ module.exports = function(db) {
 		},
 		sessions: {
 			type: [String]
+		},
+		currentGame: {
+			type: db.Schema.ObjectId,
+			ref: 'Game'
 		}
 	});
 
@@ -81,7 +85,7 @@ module.exports = function(db) {
 		create: function(req, res, next) {
 	
 			if(!req.body.username || !req.body.password) {
-				throw new Error(	'Username and password must be specified');
+				throw new Error('Username and password must be specified');
 			}
 
 			create(req.body)

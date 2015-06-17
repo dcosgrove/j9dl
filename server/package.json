@@ -11,6 +11,7 @@
     "express": "^4.12.4",
     "express-session": "^1.11.3",
     "express-validator": "^2.12.1",
+    "lodash": "^3.9.3",
     "method-override": "^2.3.3",
     "mongoose": "^4.0.5"
   },
