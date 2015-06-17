@@ -4,7 +4,9 @@
   "description": "Server for j9dl matchmaking system",
   "main": "app.js",
   "dependencies": {
-    "express": "^4.12.4"
+    "bluebird": "^2.9.30",
+    "express": "^4.12.4",
+    "mongoose": "^4.0.5"
   },
   "devDependencies": {},
   "scripts": {
