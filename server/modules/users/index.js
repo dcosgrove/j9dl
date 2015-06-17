@@ -34,10 +34,11 @@ module.exports = function(db) {
 
 	var User = db.model('User', userSchema);
 
+	
+	
 	var create = function(fields) {
-
-		var hash = Promise.promisify(bcrypt.hash);
-		
+	
+		var hash = Promise.promisify(bcrypt.hash);	
 		return hash(fields.password, 8)
 		.then(function(password) {
 
@@ -50,6 +51,26 @@ module.exports = function(db) {
 			return user.save();
 		});
 	};
+
+	var authenticate = function(fields) {
+
+		var compare = Promise.promisify(bcrypt.compare);
+		
+		return User.findOne({ username: fields.username }).select('password')
+		.then(function(user) {
+
+			if(!user) {
+				throw new Error('Username not found');
+			}
+
+			return compare(fields.password, user.password);
+  		})
+  		.then(function(matches) {
+  			if(!matches) {
+				throw new Error('Wrong password');
+			}
+  		});
+	}
 
 
 	return {
@@ -70,6 +91,7 @@ module.exports = function(db) {
 		},
 
 		get: function(req, res, next) {
+
 			return User.findById(req.params.id)
 			.then(function(user) {
 				
@@ -92,7 +114,15 @@ module.exports = function(db) {
 			}, function(err) {
 				next(err);
 			});
+		},
+
+		login: function(req, res, next) {
+			return authenticate(req.body)
+			.then(function() {
+				res.status(200).json({});
+			}, function(err) {
+				next(err);
+			});
 		}
 	}
 }
-

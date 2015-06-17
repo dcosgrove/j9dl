@@ -6,6 +6,8 @@ module.exports = function(modules) {
 	
 	return {
 		connect: function(router) {
+
+			router.post('/login', modules.users.login);
 			router.post('/users', modules.users.create);
 			router.get('/users', modules.users.list);
 			router.get('/users/:id', modules.users.get);
