@@ -21,31 +21,41 @@ module.exports = function(db) {
 		email: { 
 			type: String, 
 			select: false
+		},
+		createdAt: {
+			type: Date,
+			default: Date.now
+		},
+		admin: {
+			type: Boolean,
+			default: false
 		}
 	});
 
 	var User = db.model('User', userSchema);
 
-	var create = function(user) {
+	var create = function(fields) {
 
 		var hash = Promise.promisify(bcrypt.hash);
-		hash(user.password, 8)
-		.then(function(hashed) {
+		
+		return hash(fields.password, 8)
+		.then(function(password) {
+
 			var user = new User({
-				username: user.username,
-				password: hash,
-				email: user.email
+				username: fields.username,
+				password: password,
+				email: fields.email
 			});
 
 			return user.save();
-		})
-	}
-
+		});
+	};
 
 
 	return {
+
 		create: function(req, res, next) {
-			
+	
 			if(!req.body.username || !req.body.password) {
 				throw new Error('Username and password must be specified');
 			}
@@ -53,18 +63,35 @@ module.exports = function(db) {
 			create(req.body)
 			.then(function(user) {
 				console.log('successfully created user:', req.body.username);
-				res.json(user);
+				res.status(201).json({});
 			}, function(err) {
 				next(err);
 			});
 		},
 
 		get: function(req, res, next) {
+			return User.findById(req.params.id)
+			.then(function(user) {
+				
+				if(!user) {
+					throw new Error('User not found');
+				}
 
+				res.status(200).json(user);
+			})
+			.catch(function(err) {
+				next(err);
+			})
 		},
 
 		list: function(req, res, next) {
-
+			
+			return User.find()
+			.then(function(users) {
+				res.status(200).json(users);
+			}, function(err) {
+				next(err);
+			});
 		}
 	}
 }

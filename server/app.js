@@ -1,7 +1,9 @@
 
 var Promise = require('bluebird');
 var express = require('express');
-var router = express.Router();
+var bodyParser = require('body-parser');
+var expressValidator = require('express-validator');
+var methodOverride = require('method-override');
 var mongoose = require('mongoose');
 Promise.promisifyAll(require('mongoose'));
 
@@ -32,7 +34,6 @@ var dbPromise = new Promise(function(resolve, reject) {
 dbPromise.then(function(db) {
 
 	// inject db instance to modules
-
 	return modules(db);
 })
 .then(function(modules) {
@@ -40,9 +41,18 @@ dbPromise.then(function(db) {
 	var app = express();
 	var router = express.Router();
 
+	app.use(bodyParser.json());
+	app.use(methodOverride());
+
 	app.use('/', router);
 
 	routes(modules).connect(router);
+
+	app.use(function(err, req, res, next) {
+		res.status(400).json({
+			error: err.message
+		});
+	});
 
 	app.listen(config.port, function(){
 		console.log('server started on port', config.port);
