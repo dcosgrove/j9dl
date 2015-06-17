@@ -49,7 +49,6 @@ dbPromise.then(function(db) {
 
 	app.use(bodyParser.json());
 	app.use(methodOverride());
-	
 
 	var router = express.Router();
 	app.use('/', router);

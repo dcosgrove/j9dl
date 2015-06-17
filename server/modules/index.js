@@ -6,6 +6,7 @@ module.exports = function(db) {
 	};
 
 	return {
-		users: inject('./users')
+		users: inject('./users'),
+		games: inject('./games')
 	}
 };

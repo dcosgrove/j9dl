@@ -1,8 +1,6 @@
 var Promise = require('bluebird');
 var bcrypt = require('bcrypt');
 
-
-
 // users
 module.exports = function(db) {
 

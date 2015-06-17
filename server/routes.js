@@ -1,8 +1,4 @@
 module.exports = function(modules) {
-
-	// var authUser = modules.auth.authUser;
-	// var authAdmin = modules.auth.authAdmin;
-	// var authSelf = modules.auth.authSelf;
 	
 	return {
 		connect: function(router) {
@@ -12,6 +8,9 @@ module.exports = function(modules) {
 			router.post('/users', modules.users.create);
 			router.get('/users', modules.users.list);
 			router.get('/users/:id', modules.users.get);
+
+			router.post('/games', modules.games.create);
+			router.get('/games/:id', modules.games.get);
 		}
 	}
 }
