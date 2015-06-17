@@ -6,11 +6,13 @@ module.exports = function(db) {
 	var gameSchema = db.Schema({
 		
 		creator: { 
-			type: User,
+			type: db.Schema.ObjectId,
+			ref: 'User',
 			required: true
 		},
 		players: { 
-			type: [User], 
+			type: [ db.Schema.ObjectId ],
+			ref: 'User',
 			required: true
 		},
 		createdAt: {
@@ -18,7 +20,7 @@ module.exports = function(db) {
 			default: Date.now
 		},
 		mode: {
-			type: Boolean,
+			type: String,
 			required: true,
 			validate: function(s) {
 				return (s == 'PD' || s == 'SG');
@@ -40,11 +42,13 @@ module.exports = function(db) {
 	});
 
 	var Game = db.model('Game', gameSchema);
+	var User = db.model('User');
 
 	var create = function(fields) {
 
-		User.findById(fields.creator)
+		return User.findById(fields.creator)
 		.then(function(creator) {
+
 			var game = new Game({
 				creator: creator,
 				players: [ creator ],
@@ -53,18 +57,17 @@ module.exports = function(db) {
 
 			return game.save();
 		});
-	
 	};
 
 	return {
 
 		create: function(req, res, next) {
-	
+				
 			if(!req.session.user) {
 				throw new Error('Must be logged in to create a game');
 			}
 
-			var fields = req.body;
+			var fields = req.body || {};
 			fields.creator = req.session.user;
 			
 			create(fields)

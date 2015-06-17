@@ -88,7 +88,7 @@ module.exports = function(db) {
 			.then(function(user) {
 				console.log('successfully created user:', req.body.username);
 
-				req.session.userId = user.id;
+				req.session.user = user.id;
 				res.status(201).json({});
 			}, function(err) {
 				next(err);
