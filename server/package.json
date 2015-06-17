@@ -7,7 +7,9 @@
     "bcrypt": "^0.8.3",
     "bluebird": "^2.9.30",
     "body-parser": "^1.13.1",
+    "connect-mongo": "^0.8.1",
     "express": "^4.12.4",
+    "express-session": "^1.11.3",
     "express-validator": "^2.12.1",
     "method-override": "^2.3.3",
     "mongoose": "^4.0.5"

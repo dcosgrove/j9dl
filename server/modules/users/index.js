@@ -1,6 +1,8 @@
 var Promise = require('bluebird');
 var bcrypt = require('bcrypt');
 
+
+
 // users
 module.exports = function(db) {
 
@@ -29,13 +31,14 @@ module.exports = function(db) {
 		admin: {
 			type: Boolean,
 			default: false
+		},
+		sessions: {
+			type: [String]
 		}
 	});
 
 	var User = db.model('User', userSchema);
 
-	
-	
 	var create = function(fields) {
 	
 		var hash = Promise.promisify(bcrypt.hash);	
@@ -63,27 +66,31 @@ module.exports = function(db) {
 				throw new Error('Username not found');
 			}
 
-			return compare(fields.password, user.password);
-  		})
-  		.then(function(matches) {
-  			if(!matches) {
-				throw new Error('Wrong password');
-			}
-  		});
-	}
+			return compare(fields.password, user.password)
+			.then(function(matches) {
+  				
+  				if(!matches) {
+					throw new Error('Wrong password');
+				}
 
+				return user;
+			});
+  		});
+	};
 
 	return {
 
 		create: function(req, res, next) {
 	
 			if(!req.body.username || !req.body.password) {
-				throw new Error('Username and password must be specified');
+				throw new Error(	'Username and password must be specified');
 			}
 
 			create(req.body)
 			.then(function(user) {
 				console.log('successfully created user:', req.body.username);
+
+				req.session.userId = user.id;
 				res.status(201).json({});
 			}, function(err) {
 				next(err);
@@ -118,10 +125,22 @@ module.exports = function(db) {
 
 		login: function(req, res, next) {
 			return authenticate(req.body)
-			.then(function() {
+			.then(function(user) {
+				req.session.user = user.id;
 				res.status(200).json({});
 			}, function(err) {
 				next(err);
+			});
+		},
+
+		logout: function(req, res, next) {
+
+			req.session.destroy(function(err) {
+				if(err) {
+					return next(err);
+				} else {
+					res.status(200).json({});
+				}
 			});
 		}
 	}

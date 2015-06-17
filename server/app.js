@@ -4,6 +4,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
 var methodOverride = require('method-override');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 Promise.promisifyAll(require('mongoose'));
 
@@ -39,11 +41,17 @@ dbPromise.then(function(db) {
 .then(function(modules) {
 
 	var app = express();
-	var router = express.Router();
+	
+	app.use(session({
+		secret: 'vlv',
+		store: new MongoStore({ mongooseConnection: mongoose.connection })
+	}));
 
 	app.use(bodyParser.json());
 	app.use(methodOverride());
+	
 
+	var router = express.Router();
 	app.use('/', router);
 
 	routes(modules).connect(router);
