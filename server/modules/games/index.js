@@ -86,10 +86,7 @@ module.exports = function(db) {
 	};
 
 	var abortGame = function(game) {
-
-		return Promise.all(_.map(game.players, function(player) {
-			return removePlayer(player.id);
-		}))
+		return Promise.all(_.map(game.players, removePlayer))
 		.then(function() {
 			return Game.findByIdAndRemove(game.id);
 		});
@@ -100,15 +97,17 @@ module.exports = function(db) {
 		create: function(req, res, next) {
 				
 			if(!req.session.user) {
-				throw new Error('Must be logged in');
+				next(new Error('Must be logged in'));
 			}
 
 			var fields = req.body || {};
 			fields.creator = req.session.user;
 			
 			return create(fields)
-			.then(function() {
-				res.status(201).json({});
+			.then(function(player) {
+				res.status(201).json({
+					game: player.currentGame
+				});
 			}, function(err) {
 				next(err);
 			});
@@ -117,10 +116,14 @@ module.exports = function(db) {
 		withdraw: function(req, res, next) {
 
 			if(!req.session.user) {
-				throw new Error('Must be logged in');
+				next(new Error('Must be logged in'));
+			} else if(req.session.user != req.params.user) {
+				// current limitation: player can withdraw themselves only
+				// TODO: admin can do it too
+				next(new Error('Authorization error'));
 			}
 
-			return removePlayer(req.session.user)
+			return removePlayer(req.params.user)
 			.then(function() {
 				res.status(200).json({});
 			}, function(err) {
@@ -131,7 +134,7 @@ module.exports = function(db) {
 		abort: function(req, res, next) {
 			
 			if(!req.session.user) {
-				throw new Error('Must be logged in');
+				next(new Error('Must be logged in'));
 			}
 
 			return Game.findById(req.params.id)
@@ -141,6 +144,11 @@ module.exports = function(db) {
 				} else {
 					throw new Error('Authorization error');
 				}
+			})
+			.then(function() {
+				res.status(200).json({});
+			}, function(err) {
+				next(err);
 			});
 		},
 
