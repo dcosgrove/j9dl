@@ -1,8 +1,8 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
+  "name": "j9dl-client",
+  "description": "Frontend client for j9dl server",
   "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
+  "homepage": "https://github.com/dcosgrove/j9dl/client",
   "license": "MIT",
   "private": true,
   "dependencies": {
