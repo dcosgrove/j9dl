@@ -15,7 +15,7 @@ var modules = require('./modules');
 
 var config = {
 	port: process.env.PORT || 8000,
-	mongoUrl: 'mongodb://localhost:27017/j9dl'
+	mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/j9dl'
 };
 
 mongoose.connect(config.mongoUrl);
