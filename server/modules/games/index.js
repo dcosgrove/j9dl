@@ -1,6 +1,9 @@
 var Promise = require('bluebird');
 var _ = require('lodash');
 
+
+// var Matchmaking = require('./matchmaking');
+
 // games
 module.exports = function(db) {
 
@@ -97,6 +100,11 @@ module.exports = function(db) {
 		// TODO - more restrictions here
 		return Game.findById(game)
 		.then(function(game) {
+
+			if(game.players.length >= 10) {
+				throw new Error('Game is full');
+			}
+
 			game.players.push(player);
 			return game.save()
 			.then(function(game) {
@@ -110,6 +118,11 @@ module.exports = function(db) {
 				});
 			});
 		});
+	};
+
+	var beginGame = function(game) {
+
+		return Game.find
 	}
 
 	return {
@@ -226,6 +239,25 @@ module.exports = function(db) {
 			.catch(function(err) {
 				next(err);
 			})
+		},
+
+		begin: function(req, res, next) {
+
+			if(!req.session.user) {
+				next(new Error('Must be logged in'));
+			}
+
+			return Game.findById(req.params.id)
+			.then(function(game) {
+
+				if(req.session.user == game.creator) {
+					return beginGame(req.params.id);
+				}
+				
+				res.status(200).json(game);
+			}, function(err) {
+				next(err);
+			});
 		}
 	}
 }

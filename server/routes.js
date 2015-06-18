@@ -13,6 +13,8 @@ module.exports = function(modules) {
 			router.get('/games', modules.games.list);
 			router.get('/games/:id', modules.games.get);
 
+			router.post('/games/:id/begin', modules.games.begin);
+
 			router.post('/games/:id/players', modules.games.join);
 			router.delete('/games/:id/players/:user', modules.games.withdraw);
 			router.delete('/games/:id', modules.games.abort);
