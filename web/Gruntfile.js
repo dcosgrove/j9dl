@@ -398,6 +398,12 @@ module.exports = function (grunt) {
           remote: 'openshift',
           branch: 'master'
         }
+      },
+      dokku: {
+        options: {
+          remote: 'dokku@dcosgrove.com:web',
+          branch: 'master'
+        }
       }
     },
 
