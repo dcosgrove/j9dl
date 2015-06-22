@@ -9,6 +9,7 @@ var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 Promise.promisifyAll(require('mongoose'));
 
+var sio = require('socket.io')
 
 var routes = require('./routes');
 var modules = require('./modules');
@@ -35,13 +36,25 @@ var dbPromise = new Promise(function(resolve, reject) {
 
 dbPromise.then(function(db) {
 
-	// inject db instance to modules
-	return modules(db);
-})
-.then(function(modules) {
-
 	var app = express();
-	
+
+	var server = require('http').createServer(app);
+
+	var io = sio(server);
+
+	io.on('connection', function(socket) {
+
+		console.log('client connected');
+		socket.on('disconnect', function() {
+			console.log('disconnected');
+		})
+	});
+		
+	// inject db instance to modules
+	return [ modules(db, io), app, server ];
+})
+.spread(function(modules, app, server) {
+
 	app.use(session({
 		secret: 'vlv',
 		store: new MongoStore({ mongooseConnection: mongoose.connection })
@@ -61,10 +74,9 @@ dbPromise.then(function(db) {
 		});
 	});
 
-	app.listen(config.port, function(){
+	server.listen(config.port, function() {
 		console.log('server started on port', config.port);
 	});
-
 });
 
 

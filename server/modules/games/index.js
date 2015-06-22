@@ -25,6 +25,7 @@ module.exports = function(db) {
 		mode: {
 			type: String,
 			required: true,
+			default: 'SG',
 			validate: function(s) {
 				return (s == 'PD' || s == 'SG');
 			}
@@ -84,8 +85,8 @@ module.exports = function(db) {
 			.then(function() {
 				user.currentGame = null;
 				return user.save();
-			})
-		})
+			});
+		});
 	};
 
 	var abortGame = function(game) {
@@ -120,10 +121,22 @@ module.exports = function(db) {
 		});
 	};
 
+	var checkGameParameters = function(game) {
+
+		// TODO - validate game to ensure it's ok to start
+		return true;
+	};
+
 	var beginGame = function(game) {
 
-		return Game.find
-	}
+		return Game.findById(game)
+		.then(function(game) {
+			return checkGameParameters(game);
+		})
+		.then(function(game) {
+			return;
+		});
+	};
 
 	return {
 
@@ -194,7 +207,6 @@ module.exports = function(db) {
 			return User.findById(req.session.user)
 			.then(function(user) {
 
-				console.log(user);
 				if(user.currentGame) {
 					// move player out of current game if they're in one
 					// consider making this an error in the future				
