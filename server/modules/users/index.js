@@ -126,6 +126,7 @@ module.exports = function(db, io) {
 		},
 
 		login: function(req, res, next) {
+
 			return authenticate(req.body)
 			.then(function(user) {
 				req.session.user = user.id;

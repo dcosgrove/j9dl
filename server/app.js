@@ -4,8 +4,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
 var methodOverride = require('method-override');
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
+var Session = require('express-session');
+var MongoStore = require('connect-mongo')(Session);
 var mongoose = require('mongoose');
 Promise.promisifyAll(require('mongoose'));
 
@@ -42,28 +42,34 @@ dbPromise.then(function(db) {
 
 	var io = sio(server);
 
-	io.on('connection', function(socket) {
-
-		console.log('client connected');
-		socket.on('disconnect', function() {
-			console.log('disconnected');
-		})
+	var session = Session({
+		secret: 'vlv',
+		store: new MongoStore({ mongooseConnection: mongoose.connection }),
+		saveUnitialized: true	
 	});
-		
+
+	app.use(session);
+
+	io.use(function(socket, next) {
+		session(socket.handshake, {}, next);
+	});
+
+	io.on('connection', function(socket) {
+		console.log('sio: user connected');
+	});
+
 	// inject db instance to modules
 	return [ modules(db, io), app, server ];
 })
 .spread(function(modules, app, server) {
 
-	app.use(session({
-		secret: 'vlv',
-		store: new MongoStore({ mongooseConnection: mongoose.connection })
-	}));
-
 	app.use(bodyParser.json());
 	app.use(methodOverride());
 
 	var router = express.Router();
+
+	// debug page
+	// app.use('/web', express.static('static'));
 	app.use('/', router);
 
 	routes(modules).connect(router);
@@ -77,6 +83,7 @@ dbPromise.then(function(db) {
 	server.listen(config.port, function() {
 		console.log('server started on port', config.port);
 	});
+
 });
 
 
