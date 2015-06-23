@@ -1,6 +1,10 @@
 var _ = require('lodash');
 var math = require('mathjs');
 
+
+var Defaults = require('./defaults');
+
+
 var calculateMatchQuality = function(game) {
 
     var team1 = game.teams[0];
