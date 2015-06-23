@@ -1,8 +1,8 @@
 
-module.exports = function(db) {
+module.exports = function(db, io) {
 
 	var inject = function(component) {
-		return require(component)(db);
+		return require(component)(db, io);
 	};
 
 	return {

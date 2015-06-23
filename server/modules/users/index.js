@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 var bcrypt = require('bcrypt');
 
 // users
-module.exports = function(db) {
+module.exports = function(db, io) {
 
 	var userSchema = db.Schema({
 		username: { 

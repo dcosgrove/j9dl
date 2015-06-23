@@ -5,7 +5,7 @@ var _ = require('lodash');
 // var Matchmaking = require('./matchmaking');
 
 // games
-module.exports = function(db) {
+module.exports = function(db, io) {
 
 	var gameSchema = db.Schema({
 		
