@@ -85,7 +85,7 @@ module.exports = function(db, io) {
 		create: function(req, res, next) {
 	
 			if(!req.body.username || !req.body.password) {
-				throw new Error('Username and password must be specified');
+				next(new Error('Username and password must be specified'));
 			}
 
 			create(req.body)

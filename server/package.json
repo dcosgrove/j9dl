@@ -11,6 +11,7 @@
     "express": "^4.12.4",
     "express-session": "^1.11.3",
     "express-validator": "^2.12.1",
+    "gaussian": "^1.0.0",
     "lodash": "^3.9.3",
     "mathjs": "^1.7.0",
     "method-override": "^2.3.3",
