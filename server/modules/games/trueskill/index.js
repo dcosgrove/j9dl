@@ -1,9 +1,8 @@
 var _ = require('lodash');
 var math = require('mathjs');
 
-
+var TruncatedGaussianCorrectionFunctions = require('./truncated-gaussian-correction-functions');
 var Defaults = require('./defaults');
-
 
 var calculateMatchQuality = function(game) {
 
@@ -41,47 +40,13 @@ var calculateMatchQuality = function(game) {
     return expPart * sqrtPart;
 };
 
-// public override IDictionary<TPlayer, Rating> CalculateNewRatings<TPlayer>(GameInfo gameInfo,
-//                                                                           IEnumerable
-//                                                                               <IDictionary<TPlayer, Rating>>
-//                                                                               teams, params int[] teamRanks)
-// {
-//     Guard.ArgumentNotNull(gameInfo, "gameInfo");
-//     ValidateTeamCountAndPlayersCountPerTeam(teams);
-
-//     RankSorter.Sort(ref teams, ref teamRanks);
-
-//     IDictionary<TPlayer, Rating> team1 = teams.First();
-//     IDictionary<TPlayer, Rating> team2 = teams.Last();
-
-//     bool wasDraw = (teamRanks[0] == teamRanks[1]);
-
-//     var results = new Dictionary<TPlayer, Rating>();
-
-//     UpdatePlayerRatings(gameInfo,
-//                         results,
-//                         team1,
-//                         team2,
-//                         wasDraw ? PairwiseComparison.Draw : PairwiseComparison.Win);
-
-//     UpdatePlayerRatings(gameInfo,
-//                         results,
-//                         team2,
-//                         team1,
-//                         wasDraw ? PairwiseComparison.Draw : PairwiseComparison.Lose);
-
-//     return results;
-// }
-
 var calculateNewRatings = function(game, teams) {
 
     var team1 = teams[0];
     var team2 = teams[1];
 
     var results;
-}
-
-
+};
 
 var calculateStakes = function(game, teams) {
 
@@ -92,13 +57,13 @@ var calculateStakes = function(game, teams) {
     var teamA = {
         players: teams[0],
         meanSum: _.sum(teams[0], function(player) { return player.rating.mean; }),
-        stdDevSum = _.sum(teams[0], function(player) { return player.rating.standardDeviation; })
+        stdDevSum: _.sum(teams[0], function(player) { return player.rating.standardDeviation; })
     };
 
     var teamB = {
         players: teams[1],
         meanSum: _.sum(teams[1], function(player) { return player.rating.mean; }),
-        stdDevSum = _.sum(teams[1], function(player) { return player.rating.standardDeviation; })
+        stdDevSum: _.sum(teams[1], function(player) { return player.rating.standardDeviation; })
     };    
 
     var totalPlayers = teamA.players.length + teamB.players.length;
@@ -127,7 +92,7 @@ var calculateStakes = function(game, teams) {
                 mean: newMean,
                 standardDeviation: newStdDev
             }
-        });
+        };
 
         return {
             winner: _.map(winner.players, calculateNewRatingsForPlayer),
@@ -139,4 +104,4 @@ var calculateStakes = function(game, teams) {
         teamAWins: getStakesForOutcome(teamA, teamB),
         teamBWins: getStakesForOutcome(teamB, teamA)
     }
-}
+};

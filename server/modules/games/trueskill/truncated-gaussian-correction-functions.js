@@ -13,7 +13,7 @@ var VExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
     }
 
     var multiplier = 1.0 / (math.sqrt(2 * math.pi));
-    var expPart = math.exp((-1.0 * math.pow(teamPerformanceDifference - drawMargin, 2.0))/2.0;
+    var expPart = math.exp((-1.0 * math.pow(teamPerformanceDifference - drawMargin, 2.0))) / 2.0 ;
 
     return multiplier * expPart / d;
 };
