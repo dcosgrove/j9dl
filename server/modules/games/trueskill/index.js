@@ -1,8 +1,13 @@
 var _ = require('lodash');
 var math = require('mathjs');
+var gaussian = require('gaussian')(0, 1);
 
 var TruncatedGaussianCorrectionFunctions = require('./truncated-gaussian-correction-functions');
 var Defaults = require('./defaults');
+
+var getDrawMarginFromDrawProbability = function(drawProbability, beta) {
+    return gaussian.ppf(.5 * (drawProbability + 1))* math.sqrt(2) * beta;
+};
 
 var calculateMatchQuality = function(game) {
 
@@ -77,26 +82,33 @@ var calculateStakes = function(game, teams) {
         var v = TruncatedGaussianCorrectionFunctions.VExceedsMargin(meanDelta, drawMargin, c);
         var w = TruncatedGaussianCorrectionFunctions.WExceedsMargin(meanDelta, drawMargin, c);
 
-        var calculateNewRatingsForPlayer = function(player) {
-            var oldRating = player.rating;
+        var calculateNewRatingsForPlayer = function(isWinner) {
 
-            var meanMultiplier = (math.square(oldRating.standardDeviation) + tauSquared) / c;
-            var stdDevMultiplier = (math.square(oldRating.standardDeviation) + tauSquared) / math.square(c);
+            var rankMultiplier = isWinner ? 1 : -1;
+            return function(player) {
+                var oldRating = player.rating;
 
-            var playerMeanDelta = meanMultiplier * v * rankMultiplier;
-            var newMean = oldRating.mean + playerMeanDelta;
+                var meanMultiplier = (math.square(oldRating.standardDeviation) + tauSquared) / c;
+                var stdDevMultiplier = (math.square(oldRating.standardDeviation) + tauSquared) / math.square(c);
 
-            var newStdDev = math.sqrt((math.square(oldRating.standardDeviation) + tauSquared ) * ( 1 - w * stdDevMultiplier ));
+                var playerMeanDelta = meanMultiplier * v * rankMultiplier;
+                var newMean = oldRating.mean + playerMeanDelta;
 
-            return {
-                mean: newMean,
-                standardDeviation: newStdDev
+                var newStdDev = math.sqrt((math.square(oldRating.standardDeviation) + tauSquared ) * ( 1 - w * stdDevMultiplier ));
+
+                return {
+                    name: player.name,
+                    rating: {
+                        mean: newMean,
+                        standardDeviation: newStdDev
+                    }
+                }
             }
         };
 
         return {
-            winner: _.map(winner.players, calculateNewRatingsForPlayer),
-            loser: _.map(loser.players, calculateNewRatingsForPlayer)
+            winner: _.map(winner.players, calculateNewRatingsForPlayer(true)),
+            loser: _.map(loser.players, calculateNewRatingsForPlayer(false))
         }
     };
 
@@ -105,3 +117,44 @@ var calculateStakes = function(game, teams) {
         teamBWins: getStakesForOutcome(teamB, teamA)
     }
 };
+
+// tests
+
+var testGame = new Defaults.game();
+
+var testTeamA = [ 
+    { name: 'vita', rating: { mean: 25, standardDeviation: 8.33 }},
+    { name: 'rsp', rating: { mean: 25, standardDeviation: 8.33 }},
+    { name: 'pojo', rating: { mean: 25, standardDeviation: 4 }}
+];
+
+var testTeamB = [ 
+    { name: 'gorge', rating: { mean: 25, standardDeviation: 8.33 }},
+    { name: 'shy', rating: { mean: 25, standardDeviation: 8.33 }},
+    { name: 'firetako', rating: { mean: 25, standardDeviation: 8.33 }}
+];
+
+var stakes = calculateStakes(testGame, [ testTeamA, testTeamB ]);
+console.log('---------------');
+console.log('team A wins');
+
+_.forEach(stakes.teamAWins.winner, function(player) {
+    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+});
+
+_.forEach(stakes.teamAWins.loser, function(player) {
+    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+});
+
+console.log('---------------');
+console.log('team B wins');
+
+_.forEach(stakes.teamBWins.loser, function(player) {
+    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+});
+
+_.forEach(stakes.teamBWins.winner, function(player) {
+    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+});
+ console.log('---------------');
+

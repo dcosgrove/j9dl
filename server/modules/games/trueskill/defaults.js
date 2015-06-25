@@ -4,11 +4,11 @@ var defaultInitialMean = 25.0;
 module.exports = {
 
     // values from: https://github.com/moserware/Skills/blob/master/Skills/GameInfo.cs
-    game: {
-        beta: defaultInitialMean / 6.0,
-        drawProbability: 0.10,
-        initialMean: defaultInitialMean,
-        dynamicsFactor: defaultInitialMean / 300.0,
-        initialStandardDeviation:  defaultInitialMean / 3.0
+    game: function() {
+        this.beta = defaultInitialMean / 6.0;
+        this.drawProbability = 0.10;
+        this.initialMean = defaultInitialMean;
+        this.dynamicsFactor = defaultInitialMean / 300.0;
+        this.initialStandardDeviation = defaultInitialMean / 3.0;
     }
 }

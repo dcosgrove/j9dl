@@ -1,4 +1,4 @@
-var gaussian = require('gaussian');
+var gaussian = require('gaussian')(0, 1);
 var math = require('mathjs');
 
 var VExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
@@ -6,7 +6,7 @@ var VExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
     teamPerformanceDifference /= c;
     drawMargin /= c;
 
-    var d = gaussian.ctf(teamPerformanceDifference - drawMargin);
+    var d = gaussian.cdf(teamPerformanceDifference - drawMargin);
 
     if(d < 2.222758749e-162) {
         return -teamPerformanceDifference + drawMargin;
@@ -26,9 +26,9 @@ var WExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
     teamPerformanceDifference /= c;
     drawMargin /= c;
 
-    var d = gaussian.ctf(teamPerformanceDifference - drawMargin);
+    var d = gaussian.cdf(teamPerformanceDifference - drawMargin);
 
-    if (denominator < 2.222758749e-162)
+    if (d < 2.222758749e-162)
     {
         if (teamPerformanceDifference < 0.0)
         {
