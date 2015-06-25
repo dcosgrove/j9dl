@@ -124,7 +124,7 @@ var testGame = new Defaults.game();
 
 var testTeamA = [ 
     { name: 'vita', rating: { mean: 25, standardDeviation: 8.33 }},
-    { name: 'rsp', rating: { mean: 25, standardDeviation: 8.33 }},
+    { name: 'rsp', rating: { mean: 30, standardDeviation: 8.33 }},
     { name: 'pojo', rating: { mean: 25, standardDeviation: 4 }}
 ];
 
@@ -138,23 +138,25 @@ var stakes = calculateStakes(testGame, [ testTeamA, testTeamB ]);
 console.log('---------------');
 console.log('team A wins');
 
+console.log(':::team A:::')
 _.forEach(stakes.teamAWins.winner, function(player) {
     console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
 });
 
+console.log(':::team B:::')
 _.forEach(stakes.teamAWins.loser, function(player) {
     console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
 });
 
 console.log('---------------');
-console.log('team B wins');
+// console.log('team B wins');
 
-_.forEach(stakes.teamBWins.loser, function(player) {
-    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
-});
+// _.forEach(stakes.teamBWins.loser, function(player) {
+//     console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+// });
 
-_.forEach(stakes.teamBWins.winner, function(player) {
-    console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
-});
- console.log('---------------');
+// _.forEach(stakes.teamBWins.winner, function(player) {
+//     console.log(player.name, 'm', player.rating.mean, 't', player.rating.standardDeviation);
+// });
+//  console.log('---------------');
 
