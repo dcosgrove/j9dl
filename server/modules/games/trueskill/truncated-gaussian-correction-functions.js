@@ -1,6 +1,8 @@
 var gaussian = require('gaussian')(0, 1);
 var math = require('mathjs');
 
+var epsilon = 1e-20; // TODO - ensure epsilon @ 1e-20 is low enough
+
 var VExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
 
     teamPerformanceDifference /= c;
@@ -8,27 +10,24 @@ var VExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
 
     var d = gaussian.cdf(teamPerformanceDifference - drawMargin);
 
-    if(d < 2.222758749e-162) {
+    if(d < epsilon) {
         return -teamPerformanceDifference + drawMargin;
     }
 
-    var multiplier = 1.0 / (math.sqrt(2 * math.pi));
-    var expPart = math.exp((-1.0 * math.pow(teamPerformanceDifference - drawMargin, 2.0))) / 2.0 ;
-
-    return multiplier * expPart / d;
+    return gaussian.pdf(teamPerformanceDifference - drawMargin) / d;
 };
 
 var WExceedsMargin = function(teamPerformanceDifference, drawMargin, c) {
 
-    var vWin = VExceedsMargin(teamPerformanceDifference, drawMargin, c);
-    var result = vWin * (vWin + teamPerformanceDifference - drawMargin);
-
     teamPerformanceDifference /= c;
     drawMargin /= c;
 
+    var vWin = VExceedsMargin(teamPerformanceDifference, drawMargin, 1); // don't divide by d again
+    var result = vWin * (vWin + teamPerformanceDifference - drawMargin);
+
     var d = gaussian.cdf(teamPerformanceDifference - drawMargin);
 
-    if (d < 2.222758749e-162)
+    if (d < epsilon)
     {
         if (teamPerformanceDifference < 0.0)
         {
