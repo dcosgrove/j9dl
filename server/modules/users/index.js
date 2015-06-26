@@ -36,6 +36,16 @@ module.exports = function(db, io) {
 		currentGame: {
 			type: db.Schema.ObjectId,
 			ref: 'Game'
+		},
+		rating: {
+			mean: {
+				type: Number,
+				default: 25.0
+			},
+			stdDev: {
+				type: Number,
+				default: 25.0 / 3
+			}
 		}
 	});
 

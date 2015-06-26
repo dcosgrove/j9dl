@@ -1,8 +1,7 @@
 var Promise = require('bluebird');
 var _ = require('lodash');
 
-
-// var Matchmaking = require('./matchmaking');
+var tsr = require('./trueskill');
 
 // games
 module.exports = function(db, io) {
@@ -14,10 +13,10 @@ module.exports = function(db, io) {
 			ref: 'User',
 			required: true
 		},
-		players: { 
-			type: [ db.Schema.ObjectId ],
+		players: [{ 
+			type:  db.Schema.ObjectId ,
 			ref: 'User'
-		},
+		}],
 		createdAt: {
 			type: Date,
 			default: Date.now
@@ -234,6 +233,9 @@ module.exports = function(db, io) {
 					throw new Error('Game not found');
 				}
 
+				return game.populateAsync('players creator')
+			})
+			.then(function(game) {
 				res.status(200).json(game);
 			})
 			.catch(function(err) {

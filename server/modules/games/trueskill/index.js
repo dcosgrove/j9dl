@@ -115,10 +115,17 @@ var calculateStakes = function(game, teams) {
     }
 };
 
+module.exports = {
+    calculateStakes: calculateStakes,
+    calculateMatchQuality: calculateMatchQuality
+};
+
+
 // debug tests
 // compare to: http://boson.research.microsoft.com/trueskill/rankcalculator.aspx
 
-var testTrueskill = function() {
+var testAndPrint = function() {
+    
     var testGame = new Defaults.game();
 
     var testTeamA = [ 
@@ -153,6 +160,5 @@ var testTrueskill = function() {
     console.log('match quality', calculateMatchQuality(testGame, [testTeamA, testTeamB]));
 }
 
-
-
+// testAndPrint();
 
