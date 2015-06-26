@@ -133,6 +133,7 @@ module.exports = function(db, io) {
 			return checkGameParameters(game);
 		})
 		.then(function(game) {
+
 			return;
 		});
 	};
@@ -242,7 +243,6 @@ module.exports = function(db, io) {
 				next(err);
 			})
 		},
-
 
 		list: function(req, res, next) {
 
