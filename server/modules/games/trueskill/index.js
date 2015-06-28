@@ -11,7 +11,9 @@ var getDrawMarginFromDrawProbability = function(drawProbability, beta) {
     // return gaussian.ppf(.5 * (drawProbability + 1))* math.sqrt(2) * beta;
 };
 
-var calculateMatchQuality = function(game, teams) {
+var calculateMatchQuality = function(teams) {
+
+    var game = new Defaults.game();
 
     var teamA = teams[0];
     var teamB = teams[1];
@@ -47,7 +49,10 @@ var calculateMatchQuality = function(game, teams) {
     return expPart * sqrtPart;
 };
 
-var calculateStakes = function(game, teams) {
+var calculateStakes = function(teams) {
+
+    // should Game params ever change? remains to be seen
+    var game = new Defaults.game();
 
     var drawMargin = getDrawMarginFromDrawProbability(game.drawProbability, game.beta);
     var betaSquared = math.square(game.beta);
@@ -125,8 +130,6 @@ module.exports = {
 // compare to: http://boson.research.microsoft.com/trueskill/rankcalculator.aspx
 
 var testAndPrint = function() {
-    
-    var testGame = new Defaults.game();
 
     var testTeamA = [ 
         { name: 'vita', rating: { mean: 25, standardDeviation: 8.333 }},
@@ -142,7 +145,7 @@ var testAndPrint = function() {
         { name: 'teddy', rating: { mean: 25, standardDeviation: 8.333 }}
     ];
 
-    var stakes = calculateStakes(testGame, [ testTeamA, testTeamB ]);
+    var stakes = calculateStakes([ testTeamA, testTeamB ]);
     console.log('---------------');
     console.log('team A wins');
 

@@ -2,6 +2,8 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 
 var tsr = require('./trueskill');
+var matchmaking = require('./matchmaking');
+
 
 // games
 module.exports = function(db, io) {
@@ -17,6 +19,10 @@ module.exports = function(db, io) {
 			type:  db.Schema.ObjectId ,
 			ref: 'User'
 		}],
+		teamA: [[{ 
+			type:  db.Schema.ObjectId ,
+			ref: 'User'
+		}]],
 		createdAt: {
 			type: Date,
 			default: Date.now
@@ -39,7 +45,7 @@ module.exports = function(db, io) {
 					|| s == 'Void');
 			}
 		},
-		result: {
+		winner: {
 			type: String
 		}
 	});
@@ -126,15 +132,17 @@ module.exports = function(db, io) {
 		return true;
 	};
 
-	var beginGame = function(game) {
+	var beginGame = function(gameId) {
 
-		return Game.findById(game)
+		return Game.findById(gameId)
 		.then(function(game) {
 			return checkGameParameters(game);
 		})
 		.then(function(game) {
-
-			return;
+			return Promise.resolve(matchmaking.findBalancedTeams(tsr.calculateMatchQuality)(game))
+			.then(function(teamInfo) {
+				game.teams = teamInfo.teams
+			})
 		});
 	};
 

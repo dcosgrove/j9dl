@@ -23,7 +23,7 @@ module.exports = {
 				var teamA = combination;
 				var teamB = _.xor(players, teamA);
 
-				var quality = compare(game, [teamA, teamB]);
+				var quality = compare([teamA, teamB]);
 				
 				if(quality >= maxQuality) {
 					maxQuality = quality;
