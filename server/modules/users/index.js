@@ -42,7 +42,7 @@ module.exports = function(db, io) {
 				type: Number,
 				default: 25.0
 			},
-			stdDev: {
+			standardDeviation: {
 				type: Number,
 				default: 25.0 / 3
 			}

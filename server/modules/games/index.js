@@ -4,7 +4,6 @@ var _ = require('lodash');
 var tsr = require('./trueskill');
 var matchmaking = require('./matchmaking');
 
-
 // games
 module.exports = function(db, io) {
 
@@ -19,10 +18,6 @@ module.exports = function(db, io) {
 			type:  db.Schema.ObjectId ,
 			ref: 'User'
 		}],
-		teamA: [[{ 
-			type:  db.Schema.ObjectId ,
-			ref: 'User'
-		}]],
 		createdAt: {
 			type: Date,
 			default: Date.now
@@ -136,13 +131,28 @@ module.exports = function(db, io) {
 
 		return Game.findById(gameId)
 		.then(function(game) {
-			return checkGameParameters(game);
+
+			return game.populateAsync('players');
+		})
+		.then(function(game) {
+			if(checkGameParameters(game)) {
+				return game;
+			} else {
+				throw new Error('Unable to start');
+			}
 		})
 		.then(function(game) {
 			return Promise.resolve(matchmaking.findBalancedTeams(tsr.calculateMatchQuality)(game))
 			.then(function(teamInfo) {
-				game.teams = teamInfo.teams
-			})
+				game.teams = teamInfo.teams;
+				game.matchQuality = teamInfo.quality;
+
+				game.stakes = tsr.calculateStakes(game.teams);
+				game.status = 'In Progress';
+
+				console.log(']]]]]]]]]]]]]]]]]]]]]', game);
+				return game.save();
+			});
 		});
 	};
 
@@ -274,8 +284,11 @@ module.exports = function(db, io) {
 
 				if(req.session.user == game.creator) {
 					return beginGame(req.params.id);
+				} else {
+					throw new Error('Must be creator');
 				}
-				
+			})
+			.then(function(game) {
 				res.status(200).json(game);
 			}, function(err) {
 				next(err);
