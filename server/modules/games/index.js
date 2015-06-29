@@ -149,8 +149,7 @@ module.exports = function(db, io) {
 
 				game.stakes = tsr.calculateStakes(game.teams);
 				game.status = 'In Progress';
-
-				console.log(']]]]]]]]]]]]]]]]]]]]]', game);
+				
 				return game.save();
 			});
 		});
