@@ -18,6 +18,15 @@ module.exports = function(db, io) {
 			type:  db.Schema.ObjectId ,
 			ref: 'User'
 		}],
+		// mongoose doesn't support array of array of type...luckily we always have 2 teams
+		teamA: [{ 
+			type:  db.Schema.ObjectId,
+			ref: 'User'
+		}],
+		teamB: [{ 
+			type:  db.Schema.ObjectId ,
+			ref: 'User'
+		}],
 		createdAt: {
 			type: Date,
 			default: Date.now
@@ -42,7 +51,11 @@ module.exports = function(db, io) {
 		},
 		winner: {
 			type: String
-		}
+		},
+		matchQuality: {
+			type: Number
+		},
+		stakes: db.Schema.Types.Mixed
 	});
 
 	var Game = db.model('Game', gameSchema);
@@ -144,12 +157,18 @@ module.exports = function(db, io) {
 		.then(function(game) {
 			return Promise.resolve(matchmaking.findBalancedTeams(tsr.calculateMatchQuality)(game))
 			.then(function(teamInfo) {
-				game.teams = teamInfo.teams;
+
+				var teamA = teamInfo.teams[0];
+				var teamB = teamInfo.teams[1];
+				game.teamA = teamA;
+				game.teamB = teamB;
+
 				game.matchQuality = teamInfo.quality;
 
-				game.stakes = tsr.calculateStakes(game.teams);
+
+				game.stakes = tsr.calculateStakes([ teamA, teamB ]);
 				game.status = 'In Progress';
-				
+
 				return game.save();
 			});
 		});

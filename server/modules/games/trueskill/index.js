@@ -99,7 +99,7 @@ var calculateStakes = function(teams) {
                 );
 
                 return {
-                    name: player.name,
+                    playerId: player.id,
                     rating: {
                         mean: newMean,
                         standardDeviation: newStdDev
