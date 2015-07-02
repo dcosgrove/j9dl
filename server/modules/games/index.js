@@ -18,14 +18,53 @@ module.exports = function(db, io) {
 			type:  db.Schema.ObjectId ,
 			ref: 'User'
 		}],
-		// mongoose doesn't support array of array of type...luckily we always have 2 teams
-		teamA: [{ 
-			type:  db.Schema.ObjectId,
-			ref: 'User'
+		teamA: [{
+			player: {
+				type:  db.Schema.ObjectId,
+				ref: 'User'
+			},
+			stakes: {
+				win: {
+					mean: {
+						type: Number
+					},
+					standardDeviation: {
+						type: Number
+					}				
+				},
+				lose: {
+					mean: {
+						type: Number
+					},
+					standardDeviation: {
+						type: Number
+					}				
+				},
+			}
 		}],
-		teamB: [{ 
-			type:  db.Schema.ObjectId ,
-			ref: 'User'
+		teamB: [{
+			player: {
+				type:  db.Schema.ObjectId,
+				ref: 'User'
+			},
+			stakes: {
+				win: {
+					mean: {
+						type: Number
+					},
+					standardDeviation: {
+						type: Number
+					}				
+				},
+				lose: {
+					mean: {
+						type: Number
+					},
+					standardDeviation: {
+						type: Number
+					}				
+				},
+			}
 		}],
 		createdAt: {
 			type: Date,
@@ -63,8 +102,7 @@ module.exports = function(db, io) {
 		}],
 		matchQuality: {
 			type: Number
-		},
-		stakes: db.Schema.Types.Mixed
+		}
 	});
 
 	var Game = db.model('Game', gameSchema);
@@ -169,12 +207,41 @@ module.exports = function(db, io) {
 
 				var teamA = teamInfo.teams[0];
 				var teamB = teamInfo.teams[1];
-				game.teamA = teamA;
-				game.teamB = teamB;
+
+				var stakes = tsr.calculateStakes([ teamA, teamB ]);
 
 				game.matchQuality = teamInfo.quality;
 
-				game.stakes = tsr.calculateStakes([ teamA, teamB ]);
+				game.teamA = _.map(teamA, function(player) {
+
+					return {
+						player: player.id,
+						stakes: {
+							win: _.result(_.find(stakes.teamAWins, function(ratings) {
+								return ratings.playerId == player.id;
+							}), 'rating'),
+							lose: _.result(_.find(stakes.teamBWins, function(ratings) {
+								return ratings.playerId == player.id;
+							}), 'rating')
+						}
+					}
+				});
+
+				game.teamB = _.map(teamB, function(player) {
+
+					return {
+						player: player.id,
+						stakes: {
+							win: _.result(_.find(stakes.teamBWins, function(ratings) {
+								return ratings.playerId == player.id;
+							}), 'rating'),
+							lose: _.result(_.find(stakes.teamAWins, function(ratings) {
+								return ratings.playerId == player.id;
+							}), 'rating')
+						}
+					}
+				});
+				
 				game.status = 'In Progress';
 
 				return game.save();
@@ -182,8 +249,14 @@ module.exports = function(db, io) {
 		});
 	};
 
-	var finalizeGameResult = function(game, outcome) {
+	var finalizeGame = function(game, outcome) {
 		
+		if(outcome == 'scratch') {
+			game.status = 'Void';
+			// no score updates needed
+		} else {
+			return;
+		}
 	};	
 
 	var checkGameResult = function(game) {
@@ -210,7 +283,7 @@ module.exports = function(db, io) {
 		return outcome;
 	};
 
-	var resultGame = function(gameId, playerId, vote) {
+	var voteGame = function(gameId, playerId, vote) {
 
 		return Game.findById(gameId)
 		.then(function(game) {
@@ -220,14 +293,15 @@ module.exports = function(db, io) {
 				return player == playerId;
 			});
 
-			if(isPlaying) {
-				return game;
-			} else {
+			if(!isPlaying) {
 				throw new Error('Player must be participating to result a game')
+			} else if(game.status != 'In Progress') {
+				throw new Error('Can only vote on games that are in progress');
+			} else {
+				return game;
 			}
 		})
 		.then(function(game) {
-
 
 			var index = _.findIndex(game.results, function(result) {
 				return playerId == results.player;
@@ -393,7 +467,7 @@ module.exports = function(db, io) {
 				next(new Error('Must be logged in'));
 			}
 
-			return resultGame(req.params.id, req.session.user, req.body.vote)
+			return voteGame(req.params.id, req.session.user, req.body.vote)
 			.then(function(game) {
 				res.status(200).json(game);
 			}, function(err) {

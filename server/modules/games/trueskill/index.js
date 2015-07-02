@@ -108,10 +108,9 @@ var calculateStakes = function(teams) {
             }
         };
 
-        return {
-            winner: _.map(winner.players, calculateNewRatingsForPlayer(true)),
-            loser: _.map(loser.players, calculateNewRatingsForPlayer(false))
-        }
+        var winnerRatings = _.map(winner.players, calculateNewRatingsForPlayer(true));
+        var loserRatings =_.map(loser.players, calculateNewRatingsForPlayer(false));
+        return [].concat(winnerRatings, loserRatings);
     };
 
     return {
