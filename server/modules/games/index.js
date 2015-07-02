@@ -49,9 +49,18 @@ module.exports = function(db, io) {
 					|| s == 'Void');
 			}
 		},
-		winner: {
-			type: String
-		},
+		results: [{
+			player: {
+				type: db.Schema.ObjectId,
+				ref: 'User'
+			},
+			vote: {
+				type: String,
+				validate: function(s) {
+					return (s == 'A' || s == 'B' || s == 'scratch');
+				}
+			}
+		}],
 		matchQuality: {
 			type: Number
 		},
@@ -165,13 +174,78 @@ module.exports = function(db, io) {
 
 				game.matchQuality = teamInfo.quality;
 
-
 				game.stakes = tsr.calculateStakes([ teamA, teamB ]);
 				game.status = 'In Progress';
 
 				return game.save();
 			});
 		});
+	};
+
+	var finalizeGameResult = function(game, outcome) {
+		
+	};	
+
+	var checkGameResult = function(game) {
+
+		var playerCount = game.players.length; 
+
+		var votes = _.reduce(game.results, function(tally, vote) {
+			tally[vote]++;
+			return tally;
+		}, {
+			A: 0,
+			B: 0,
+			scratch: 0
+		});
+
+		var outcome;
+
+		_.each(votes, function(count, result) {
+			if(count > playerCount / 2) {
+				outcome = result;
+			}
+		});
+
+		return outcome;
+	};
+
+	var resultGame = function(gameId, playerId, vote) {
+
+		return Game.findById(gameId)
+		.then(function(game) {
+
+			// ensure player is actually in the game they're trying to vote on
+			var isPlaying = _.find(game.players, function(player) {
+				return player == playerId;
+			});
+
+			if(isPlaying) {
+				return game;
+			} else {
+				throw new Error('Player must be participating to result a game')
+			}
+		})
+		.then(function(game) {
+
+
+			var index = _.findIndex(game.results, function(result) {
+				return playerId == results.player;
+			});	
+
+			if(index) {
+				// vote changing case
+				game.results[index] = { player: playerId, vote: vote };
+			} else {
+				// new vote
+				game.results.push({ player: playerId, vote: vote });
+			}
+
+			return game.save();
+		})
+		.then(function(game) {
+			return checkGameResult(game);
+		})
 	};
 
 	return {
@@ -306,6 +380,20 @@ module.exports = function(db, io) {
 					throw new Error('Must be creator');
 				}
 			})
+			.then(function(game) {
+				res.status(200).json(game);
+			}, function(err) {
+				next(err);
+			});
+		},
+
+		result: function(req, res, next) {
+			
+			if(!req.session.user) {
+				next(new Error('Must be logged in'));
+			}
+
+			return resultGame(req.params.id, req.session.user, req.body.vote)
 			.then(function(game) {
 				res.status(200).json(game);
 			}, function(err) {
