@@ -254,8 +254,32 @@ module.exports = function(db, io) {
 		if(outcome == 'scratch') {
 			game.status = 'Void';
 			// no score updates needed
+			return game.save();
 		} else {
-			return;
+			game.status = 'Complete';
+
+			return game.populateAsync('teamA.player teamB.player')
+			.then(function(game) {
+
+				var teamAResult = outcome == 'A' ? win : lose;
+				var teamBResult = outcome == 'B' ? win : lose;
+				
+				var ratingUpdates = [].concat(
+					_.map(game.teamA, function(member) {
+						member.player.rating = member.stakes[teamAResult];
+						return member.player.save();
+					}),
+					_.map(game.teamB, function(member) {
+						member.player.rating = member.stakes[teamBResult];
+						return member.player.save();
+					})
+				);
+
+				return Promisify.all(ratingUpdates);
+			})
+			.then(function() {
+				return game.save();
+			});
 		}
 	};	
 
@@ -318,8 +342,15 @@ module.exports = function(db, io) {
 			return game.save();
 		})
 		.then(function(game) {
-			return checkGameResult(game);
-		})
+			return checkGameResult(game)
+			.then(function(outcome) {
+				if(!outcome) {
+					return game; // no update needed
+				} else {
+					return finalizeGame(game, outcome);
+				}
+			});
+		});
 	};
 
 	return {
