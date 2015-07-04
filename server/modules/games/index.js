@@ -275,7 +275,7 @@ module.exports = function(db, io) {
 					})
 				);
 
-				return Promisify.all(ratingUpdates);
+				return Promise.all(ratingUpdates);
 			})
 			.then(function() {
 				return game.save();
@@ -304,7 +304,7 @@ module.exports = function(db, io) {
 			}
 		});
 
-		return outcome;
+		return Promise.resolve(outcome);
 	};
 
 	var voteGame = function(gameId, playerId, vote) {
@@ -331,12 +331,12 @@ module.exports = function(db, io) {
 				return playerId == results.player;
 			});	
 
-			if(index) {
+			if(index >= 0) {
 				// vote changing case
 				game.results[index] = { player: playerId, vote: vote };
 			} else {
 				// new vote
-				game.results.push({ player: playerId, vote: vote });
+				game.results = game.results.push({ player: playerId, vote: vote });
 			}
 
 			return game.save();
