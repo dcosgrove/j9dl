@@ -328,15 +328,15 @@ module.exports = function(db, io) {
 		.then(function(game) {
 
 			var index = _.findIndex(game.results, function(result) {
-				return playerId == results.player;
+				return playerId == result.player;
 			});	
 
 			if(index >= 0) {
-				// vote changing case
-				game.results[index] = { player: playerId, vote: vote };
+				// vote changing case - broken right now
+				// game.results[index] = { player: playerId, vote: vote };
 			} else {
 				// new vote
-				game.results = game.results.push({ player: playerId, vote: vote });
+				game.results.push({ player: playerId, vote: vote });
 			}
 
 			return game.save();
