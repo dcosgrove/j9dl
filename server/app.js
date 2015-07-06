@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
 var methodOverride = require('method-override');
+var morgan = require('morgan');
 var Session = require('express-session');
 var MongoStore = require('connect-mongo')(Session);
 var mongoose = require('mongoose');
@@ -48,6 +49,7 @@ dbPromise.then(function(db) {
 		saveUnitialized: true	
 	});
 
+	app.use(morgan('dev'));
 	app.use(session);
 
 	io.use(function(socket, next) {
