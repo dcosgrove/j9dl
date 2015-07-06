@@ -261,8 +261,8 @@ module.exports = function(db, io) {
 			return game.populateAsync('teamA.player teamB.player')
 			.then(function(game) {
 
-				var teamAResult = outcome == 'A' ? win : lose;
-				var teamBResult = outcome == 'B' ? win : lose;
+				var teamAResult = outcome == 'A' ? 'win' : 'lose';
+				var teamBResult = outcome == 'B' ? 'win' : 'lose';
 				
 				var ratingUpdates = [].concat(
 					_.map(game.teamA, function(member) {
@@ -287,8 +287,8 @@ module.exports = function(db, io) {
 
 		var playerCount = game.players.length; 
 
-		var votes = _.reduce(game.results, function(tally, vote) {
-			tally[vote]++;
+		var votes = _.reduce(game.results, function(tally, result) {
+			tally[result.vote]++;
 			return tally;
 		}, {
 			A: 0,
