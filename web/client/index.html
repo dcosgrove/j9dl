@@ -21,7 +21,7 @@
       <!-- endinjector -->
     <!-- endbuild -->
   </head>
-  <body ng-app="webApp">
+  <body ng-app="j9dl">
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
@@ -49,8 +49,12 @@
         <!-- build:js({.tmp,client}) app/app.js -->
         <script src="app/app.js"></script>
           <!-- injector:js -->
+          <script src="app/login/login.controller.js"></script>
+          <script src="app/login/login.js"></script>
           <script src="app/main/main.controller.js"></script>
           <script src="app/main/main.js"></script>
+          <script src="app/register/register.controller.js"></script>
+          <script src="app/register/register.js"></script>
           <script src="components/modal/modal.service.js"></script>
           <script src="components/navbar/navbar.controller.js"></script>
           <!-- endinjector -->

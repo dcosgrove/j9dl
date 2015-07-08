@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('webApp')
+angular.module('j9dl')
   .controller('MainCtrl', function ($scope, $http) {
     $scope.awesomeThings = [];
 

@@ -3,7 +3,7 @@
 describe('Controller: MainCtrl', function () {
 
   // load the controller's module
-  beforeEach(module('webApp'));
+  beforeEach(module('j9dl'));
 
   var MainCtrl,
       scope,
