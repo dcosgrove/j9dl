@@ -3,7 +3,7 @@
 describe('Service: auth', function () {
 
   // load the service's module
-  beforeEach(module('webApp'));
+  beforeEach(module('j9dl'));
 
   // instantiate service
   var auth;
