@@ -30,9 +30,6 @@ module.exports = function(db, io) {
 			type: Boolean,
 			default: false
 		},
-		sessions: {
-			type: [String]
-		},
 		currentGame: {
 			type: db.Schema.ObjectId,
 			ref: 'Game'
@@ -64,6 +61,10 @@ module.exports = function(db, io) {
 			});
 
 			return user.save();
+		})
+		.then(function(user) {
+			// reload to get default selection
+			return User.findById(user.id);
 		});
 	};
 
@@ -85,7 +86,8 @@ module.exports = function(db, io) {
 					throw new Error('Wrong password');
 				}
 
-				return user;
+				// reload here to select all fields 
+				return User.findById(user.id);
 			});
   		});
 	};
@@ -103,7 +105,7 @@ module.exports = function(db, io) {
 				console.log('successfully created user:', req.body.username);
 
 				req.session.user = user.id;
-				res.status(201).json({});
+				res.status(201).json(user);
 			}, function(err) {
 				next(err);
 			});
@@ -140,7 +142,7 @@ module.exports = function(db, io) {
 			return authenticate(req.body)
 			.then(function(user) {
 				req.session.user = user.id;
-				res.status(200).json({});
+				res.status(200).json(user);
 			}, function(err) {
 				next(err);
 			});
