@@ -161,6 +161,8 @@ module.exports = function(db, io) {
 
 		getSession: function(req, res, next) {
 
+			console.log(req.session);
+
 			if(req.session.user) {
 				User.findById(req.session.user)
 				.then(function(user) {
