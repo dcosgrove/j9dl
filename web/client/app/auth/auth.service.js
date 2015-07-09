@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('j9dl')
-  .factory('auth', function ($http, $rootScope, $cookieStore) {
+  .factory('auth', function ($http, $rootScope) {
   
     var user;
 
@@ -9,8 +9,9 @@ angular.module('j9dl')
     return {
       
       register: function (formData, success, error) {
-        $http.post('http://localhost:8000/users', formData)
+        $http.post('/api/users', formData)
         .success(function(res) {
+            user = res;
             // TO DO - mark them as logged in on the client
             success();
         })
@@ -18,13 +19,39 @@ angular.module('j9dl')
       },
 
       login: function (formData, success, error) {
-        $http.post('http://localhost:8000/login', formData)
+        $http.post('/api/login', formData)
         .success(function(res) {
+            
+            user = res;
             // TO DO - mark them as logged in on the client
             success();
         })
         .error(error);
+      },
+
+      logout: function(done) {
+        $http.get('/api/logout')
+        .success(function() {
+          done();
+        })
+        .error(function() {
+          done();
+        });
+      },
+
+      getCurrentLogin: function(success, error) {
+
+        if(user) {
+          success(user);
+        } else {
+          // maybe we're out of sync w/ server
+          $http.get('/api/session')
+          .success(function(res) {
+            user = res;
+            success(user);
+          })
+          .error(error);
+        }
       }
-      
     };
   });

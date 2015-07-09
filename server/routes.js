@@ -9,6 +9,8 @@ module.exports = function(modules) {
 			router.get('/users', modules.users.list);
 			router.get('/users/:id', modules.users.get);
 
+			router.get('/session', modules.users.getSession);
+
 			router.post('/games', modules.games.create);
 			router.get('/games', modules.games.list);
 			router.get('/games/:id', modules.games.get);

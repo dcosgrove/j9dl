@@ -157,6 +157,21 @@ module.exports = function(db, io) {
 					res.status(200).json({});
 				}
 			});
+		},
+
+		getSession: function(req, res, next) {
+
+			if(req.session.user) {
+				User.findById(req.session.user)
+				.then(function(user) {
+					res.status(200).json(user);
+				});
+			} else {
+				// not logged in case
+				res.status(404).json({
+					error: 'Not logged in'
+				});
+			}
 		}
 	}
 }
