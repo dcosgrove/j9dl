@@ -10,7 +10,7 @@ angular.module('j9dl')
     auth.getCurrentLogin(function(user) {
       $scope.user = user;
       $scope.notLoggedIn = false;
-    }, function(err) {
+    }, function() {
       $scope.notLoggedIn = true;
       console.log('no user session found');
     });

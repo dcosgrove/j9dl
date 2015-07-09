@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('j9dl')
-  .factory('auth', function ($http, $rootScope) {
+  .factory('auth', function ($http) {
   
     var user;
 
