@@ -12,11 +12,11 @@
     <div class="col-sm-4">
       <div class="panel panel-default">
         <div class="panel-heading">
-            Open Games
+            Games
         </div>
         <div class="panel-body">
           <div class="list-group">
-            <a ng-repeat="game in games" ng-click="selectGame($index)" ng-class="{active: games[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }}
+            <a ng-repeat="game in games" ng-click="selectGame($index)" ng-class="{active: games[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }} - {{ game.status }}
             <span class="badge">{{ game.players.length }}</span>
             </a>
           </div>
@@ -27,7 +27,7 @@
     <div class="col-sm-8">
       <div ng-show="selectedGame" class="panel panel-default">
         <div class="panel-heading">
-            Game Details
+            <p>Game Creator: {{ selectedGame.creator.username }} | Created at: {{ selectedGame.createdAt }}</p>
         </div>
         <div ng-show="selectedGame.status == 'Pending'" class="panel-body">
           <ul class="list-group">

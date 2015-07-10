@@ -51,6 +51,7 @@ angular.module('j9dl')
  		.success(function() {
  			reloadUser(function() {
  				loadSelectedGameDetails();
+ 				refreshGamesList();
  			});
  		})
  		.error(setError);
@@ -70,6 +71,7 @@ angular.module('j9dl')
  		.success(function() {
  			reloadUser(function() {
  				loadSelectedGameDetails();
+ 				refreshGamesList();
  			});
  		})
  		.error(setError);
