@@ -271,10 +271,12 @@ module.exports = function(db, io) {
 				var ratingUpdates = [].concat(
 					_.map(game.teamA, function(member) {
 						member.player.rating = member.stakes[teamAResult];
+						member.player.currentGame = null;
 						return member.player.save();
 					}),
 					_.map(game.teamB, function(member) {
 						member.player.rating = member.stakes[teamBResult];
+						member.player.currentGame = null;
 						return member.player.save();
 					})
 				);
