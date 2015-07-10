@@ -34,7 +34,7 @@ angular.module('j9dl')
 
  	// exposed scope functions
  	$scope.createGame = function() {
- 		game.create(function(game) {
+ 		game.create(function() {
  			refreshGamesList();
  		}, setError);
  	};
@@ -48,7 +48,7 @@ angular.module('j9dl')
 
  	$scope.joinGame = function() {
  		game.join($scope.selectedGameId)
- 		.success(function() {;
+ 		.success(function() {
  			reloadUser(function() {
  				loadSelectedGameDetails();
  			});
