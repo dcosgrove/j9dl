@@ -40,6 +40,14 @@ angular.module('j9dl')
 
     withdraw: function(game, player) {
       return $http.delete('api/games/' + game + '/players/' + player);
+    },
+
+    begin: function(id) {
+      return $http.post('api/games/' + id + '/begin');
+    },
+
+    voteResult: function(game, vote) {
+      return $http.post('api/games/' + game + '/result', { vote: vote });
     }
   };
 });

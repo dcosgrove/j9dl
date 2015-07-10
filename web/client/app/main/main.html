@@ -37,19 +37,113 @@
             </li>
           </ul>
           <button type="button" ng-hide="(selectedGame.creator._id == user._id) || (selectedGame._id == user.currentGame)" ng-click="joinGame()" class="btn btn-primary">Join Game</button>
-           <button type="button" ng-show="selectedGame._id == user.currentGame" ng-click="leaveGame()" class="btn btn-primary">Leave</button>
-          <button type="button" ng-show="selectedGame.creator._id == user._id" ng-click="cancelGame()" class="btn btn-primary">Cancel Game</button>
+           <button type="button" ng-show="selectedGame._id == user.currentGame" ng-click="leaveGame()" class="btn btn-warning">Leave</button>
+          <button type="button" ng-show="selectedGame.creator._id == user._id" ng-click="cancelGame()" class="btn btn-danger">Cancel Game</button>
+          <button type="button" ng-show="selectedGame.creator._id == user._id && selectedGame.players.length >= 2" ng-click="startGame()" class="btn btn-primary">Start Game</button>
         </div>
         <div ng-show="selectedGame.status == 'In Progress'" class="panel-body">
-          <ul class="list-group">
-            Players
-            <li ng-repeat="player in selectedGame.players" class="list-group-item">{{ player.username }}</li>
-          </ul>
-          <button type="button" ng-hide="(selectedGame.creator._id == user._id) || (selectedGame._id == user.currentGame)" ng-click="joinGame()" class="btn btn-primary">Join Game</button>
-           <button type="button" ng-show="selectedGame._id == user.currentGame" ng-click="leaveGame()" class="btn btn-primary">Leave</button>
-          <button type="button" ng-show="selectedGame.creator._id == user._id" ng-click="cancelGame()" class="btn btn-primary">Cancel Game</button>
+          <div class="row">
+            <div class="col-sm-12">
+              <p> Match Quality: {{ selectedGame.matchQuality }}</p>
+            </div>
+          </div>
+          <div class="row">
+           <div class="col-sm-6">
+            <ul class="list-group">
+            Team A
+              <li ng-repeat="member in selectedGame.teamA" class="list-group-item">
+                {{ member.player.username }}
+                <span class="label label-success">
+                  {{ member.stakes.win.mean - member.player.rating.mean | ratingDisplay }}
+                </span>
+                <span class="label label-danger">
+                  {{ member.stakes.lose.mean - member.player.rating.mean | ratingDisplay }}
+                </span>
+                <span class="badge">{{ member.player.rating.mean | ratingDisplay }}</span>
+              </li>
+            </ul>
+           </div>
+           <div class="col-sm-6">
+            <ul class="list-group">
+            Team B
+              <li ng-repeat="member in selectedGame.teamB" class="list-group-item">
+                {{ member.player.username }}
+                <span class="label label-success">
+                  {{ member.stakes.win.mean - member.player.rating.mean | ratingDisplay }}
+                </span>
+                <span class="label label-danger">
+                  {{ member.stakes.lose.mean - member.player.rating.mean | ratingDisplay }}
+                </span>
+                <span class="badge">{{ member.player.rating.mean | ratingDisplay }}</span>
+              </li>
+            </ul>
+           </div>
+          </div>
+          <div class="row" ng-show="selectedGame.status == 'In Progress'">
+            <div class="col-sm-12">
+              Vote: <button type="button" ng-click="voteTeamA()" class="btn btn-success">Team A Wins</button>
+              <button type="button" ng-click="voteTeamB()" class="btn btn-success">Team B Wins</button>
+              <button type="button" ng-click="voteVoid()" class="btn btn-danger">Vote Void</button>
+            </div>
+          </div>
+          <div ng-show="selectedGame.results.length > 0" class="row">
+            <div class="col-sm-6">
+              <div class="well well-sm">
+                Votes: Team A - {{ tally.A }} | Team B - {{ tally.B }} | Void - {{ tally.scratch }}
+              </div>
+            </div>
+            <div ng-show="tally.winner" class="col-sm-6">
+              Result: {{ tally.winner }}
+            </div>
+          </div>
         </div>
-
+        <div ng-show="selectedGame.status == 'Complete'" class="panel-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <p> Match Quality: {{ selectedGame.matchQuality }}</p>
+            </div>
+          </div>
+          <div class="row">
+           <div class="col-sm-6">
+            <ul class="list-group">
+            Team A
+              <li ng-repeat="member in selectedGame.teamA" class="list-group-item">
+                {{ member.player.username }}
+                <span ng-show="tally.winner == 'A'" class="label label-success">
+                  {{ member.stakes.win.mean | ratingDisplay }}
+                </span>
+                <span ng-show="tally.winner == 'B' "class="label label-danger">
+                  {{ member.stakes.lose.mean | ratingDisplay }}
+                </span>
+              </li>
+            </ul>
+           </div>
+           <div class="col-sm-6">
+            <ul class="list-group">
+            Team B
+              <li ng-repeat="member in selectedGame.teamB" class="list-group-item">
+                {{ member.player.username }}
+                <span ng-show="tally.winner == 'B'"class="label label-success">
+                  {{ member.stakes.win.mean | ratingDisplay }}
+                </span>
+                <span ng-show="tally.winner == 'A'"class="label label-danger">
+                  {{ member.stakes.lose.mean | ratingDisplay }}
+                </span>
+              </li>
+            </ul>
+           </div>
+          </div>
+          <div ng-show="selectedGame.results.length > 0" class="row">
+            <div class="col-sm-6">
+              <div class="well well-sm">
+                Votes: Team A - {{ tally.A }} | Team B - {{ tally.B }} | Void - {{ tally.scratch }}
+              </div>
+            </div>
+            <div ng-show="tally.winner" class="col-sm-6">
+              Result: {{ tally.winner }}
+            </div>
+          </div>
+        </div>
       </div>
   </div>
 </div>

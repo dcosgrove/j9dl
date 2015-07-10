@@ -3,6 +3,10 @@
 angular.module('j9dl')
   .controller('MainCtrl', function ($scope, game, auth) {
 
+  	var setError = function(err) {
+ 		$scope.error = err;
+ 	};
+
  	var refreshGamesList = function() {
 	 	game.list(function(games) {
 	 		$scope.games = games;
@@ -24,13 +28,47 @@ angular.module('j9dl')
 	  	}, function() {});
 	};
 
+	var tallyVotes = function(results, totalPlayers) {
+
+		var tally = {
+			A: 0,
+			B: 0,
+			scratch: 0
+		};
+
+		results.forEach(function(result) {
+			tally[result.vote]++;
+
+			if(tally[result.vote] > (totalPlayers / 2)) {
+				tally.winner = result.vote;
+			}
+		});
+
+		$scope.tally = tally;
+
+		console.log('tally ho', tally);
+	};
+
  	var loadSelectedGameDetails = function() {
  		game.getDetails($scope.selectedGameId)
  		.success(function(game) {
  			$scope.selectedGame = game;
+
+ 			if(game.results) {
+ 				tallyVotes(game.results, game.teamA.length + game.teamB.length);
+ 			}
  		})
  		.error(setError);
  	};	
+
+ 	var voteResult = function(vote) {
+ 		game.voteResult($scope.selectedGameId, vote)
+ 		.success(function() {
+ 			loadSelectedGameDetails();
+ 			refreshGamesList();
+ 		})
+ 		.error(setError);
+ 	};
 
  	// exposed scope functions
  	$scope.createGame = function() {
@@ -77,8 +115,26 @@ angular.module('j9dl')
  		.error(setError);
  	};
 
- 	var setError = function(err) {
- 		$scope.error = err;
+ 	$scope.startGame = function() {
+
+ 		game.begin($scope.selectedGameId)
+ 		.success(function() {
+ 			loadSelectedGameDetails();
+ 			refreshGamesList();
+ 		})
+ 		.error(setError);
+ 	};
+
+ 	$scope.voteTeamA = function() {
+ 		voteResult('A');
+ 	};
+
+	$scope.voteTeamB = function() {
+ 		voteResult('B');
+ 	};
+
+ 	$scope.voteVoid = function() {
+ 		voteResult('scratch');
  	};
 
  	// init

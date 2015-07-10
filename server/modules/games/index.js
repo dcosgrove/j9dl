@@ -451,7 +451,7 @@ module.exports = function(db, io) {
 					throw new Error('Game not found');
 				}
 
-				return game.populateAsync('players creator')
+				return game.populateAsync('players creator teamA.player teamB.player')
 			})
 			.then(function(game) {
 				res.status(200).json(game);
