@@ -113,6 +113,10 @@ module.exports = function(db, io) {
 		return User.findById(fields.creator)
 		.then(function(creator) {
 
+			if(creator.currentGame) {
+				throw new Error('Unable to create game, leave your current game first');
+			}
+
 			var game = new Game({
 				creator: creator,
 				players: [ creator ],
@@ -367,7 +371,7 @@ module.exports = function(db, io) {
 			return create(fields)
 			.then(function(player) {
 				res.status(201).json({
-					game: player.currentGame
+					id: player.currentGame
 				});
 			}, function(err) {
 				next(err);
@@ -423,9 +427,7 @@ module.exports = function(db, io) {
 			.then(function(user) {
 
 				if(user.currentGame) {
-					// move player out of current game if they're in one
-					// consider making this an error in the future				
-					return removePlayer(user.id);
+					throw new Error('Unable to join, leave your current game first');
 				}
 			})
 			.then(function() {
@@ -461,7 +463,7 @@ module.exports = function(db, io) {
 
 		list: function(req, res, next) {
 
-			return Game.find()
+			return Game.find().populate('creator')
 			.then(function(games) {
 				res.status(200).json(games);
 			})

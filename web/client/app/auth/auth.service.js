@@ -41,17 +41,13 @@ angular.module('j9dl')
 
       getCurrentLogin: function(success, error) {
 
-        if(user) {
+        // maybe we're out of sync w/ server
+        $http.get('api/session')
+        .success(function(res) {
+          user = res;
           success(user);
-        } else {
-          // maybe we're out of sync w/ server
-          $http.get('api/session')
-          .success(function(res) {
-            user = res;
-            success(user);
-          })
-          .error(error);
-        }
+        })
+        .error(error);
       }
     };
   });

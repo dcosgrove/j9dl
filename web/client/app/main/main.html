@@ -1,28 +1,46 @@
 <div ng-include="'components/navbar/navbar.html'"></div>
 
-<header class="hero-unit" id="banner">
-  <div class="container">
-    <h1>'Allo, 'Allo!</h1>
-    <p class="lead">Kick-start your next web app with Angular Fullstack</p>
-    <img src="assets/images/yeoman.png" alt="I'm Yeoman">
-  </div>
-</header>
-
 <div class="container">
   <div class="row">
-    <div class="col-lg-12">
-      <h1 class="page-header">Features:</h1>
-      <ul class="nav nav-tabs nav-stacked col-md-4 col-lg-4 col-sm-6" ng-repeat="thing in awesomeThings">
-        <li><a href="#" tooltip="{{thing.info}}">{{thing.name}}</a></li>
-      </ul>
+    <div class="col-sm-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+            Open Games
+        </div>
+        <div class="panel-body">
+          <div class="list-group">
+            <a ng-repeat="game in games" ng-click="selectGame($index)" ng-class="{active: games[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }}
+            <span class="badge">{{ game.players.length }}</span>
+            </a>
+          </div>
+          <button type="button" ng-click="createGame()" class="btn btn-primary">New Game</button>
+        </div>  
+      </div>
+      <div class="alert alert-danger" role="alert" ng-show="error">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        {{ error.error }}
+      </div>
     </div>
+    <div class="col-sm-8">
+      <div ng-show="selectedGame" class="panel panel-default">
+        <div class="panel-heading">
+            Game Details
+        </div>
+        <div class="panel-body">
+          <ul class="list-group">
+            <li ng-repeat="player in selectedGame.players" class="list-group-item">{{ player.username }}</li>
+          </ul>
+          <button type="button" ng-hide="(selectedGame.creator._id == user._id) || (selectedGame._id == user.currentGame)" ng-click="joinGame()" class="btn btn-primary">Join Game</button>
+           <button type="button" ng-show="selectedGame._id == user.currentGame" ng-click="leaveGame()" class="btn btn-primary">Leave</button>
+          <button type="button" ng-show="selectedGame.creator._id == user._id" ng-click="cancelGame()" class="btn btn-primary">Cancel Game</button>
+        </div>
+      </div>
   </div>
 </div>
 
 <footer class="footer">
   <div class="container">
-      <p>Angular Fullstack v2.0.13 |
-        <a href="https://twitter.com/tyhenkel">@tyhenkel</a> |
-         <a href="https://github.com/DaftMonk/generator-angular-fullstack/issues?state=open">Issues</a></p>
+      <p><a href="https://www.youtube.com/watch?v=rivFCwwvoh8">Report Bugs Here</a></p> 
   </div>
 </footer>
