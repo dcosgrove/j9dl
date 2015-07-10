@@ -45,8 +45,6 @@ angular.module('j9dl')
 		});
 
 		$scope.tally = tally;
-
-		console.log('tally ho', tally);
 	};
 
  	var loadSelectedGameDetails = function() {

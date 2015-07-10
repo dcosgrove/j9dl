@@ -37,9 +37,9 @@
             </li>
           </ul>
           <button type="button" ng-hide="(selectedGame.creator._id == user._id) || (selectedGame._id == user.currentGame)" ng-click="joinGame()" class="btn btn-primary">Join Game</button>
-           <button type="button" ng-show="selectedGame._id == user.currentGame" ng-click="leaveGame()" class="btn btn-warning">Leave</button>
+           <button type="button" ng-show="selectedGame._id == user.currentGame && selectedGame.creator._id != user._id" ng-click="leaveGame()" class="btn btn-warning">Leave</button>
           <button type="button" ng-show="selectedGame.creator._id == user._id" ng-click="cancelGame()" class="btn btn-danger">Cancel Game</button>
-          <button type="button" ng-show="selectedGame.creator._id == user._id && selectedGame.players.length >= 2" ng-click="startGame()" class="btn btn-primary">Start Game</button>
+          <button type="button" ng-show="selectedGame.creator._id == user._id && selectedGame.players.length >= 10" ng-click="startGame()" class="btn btn-primary">Start Game</button>
         </div>
         <div ng-show="selectedGame.status == 'In Progress'" class="panel-body">
           <div class="row">
