@@ -9,7 +9,7 @@ angular.module('j9dl')
     return {
       
       register: function (formData, success, error) {
-        $http.post('/api/users', formData)
+        $http.post('api/users', formData)
         .success(function(res) {
             user = res;
             // TO DO - mark them as logged in on the client
@@ -19,7 +19,7 @@ angular.module('j9dl')
       },
 
       login: function (formData, success, error) {
-        $http.post('/api/login', formData)
+        $http.post('api/login', formData)
         .success(function(res) {
             
             user = res;
@@ -30,7 +30,7 @@ angular.module('j9dl')
       },
 
       logout: function(done) {
-        $http.get('/api/logout')
+        $http.get('api/logout')
         .success(function() {
           done();
         })
@@ -45,7 +45,7 @@ angular.module('j9dl')
           success(user);
         } else {
           // maybe we're out of sync w/ server
-          $http.get('/api/session')
+          $http.get('api/session')
           .success(function(res) {
             user = res;
             success(user);
