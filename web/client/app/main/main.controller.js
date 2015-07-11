@@ -3,6 +3,17 @@
 angular.module('j9dl')
   .controller('MainCtrl', function ($scope, game, auth) {
 
+  	// temporary disgusting poll until WS implemented
+  	var pollingTime = 5000;
+
+  	setInterval(function() {
+
+  		if($scope.selectedGameId) {
+  			loadSelectedGameDetails();
+  		}
+  		refreshGamesList();
+  	}, pollingTime);
+
   	var setError = function(err) {
  		$scope.error = err;
  	};
