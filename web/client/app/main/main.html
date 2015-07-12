@@ -11,12 +11,17 @@
   <div class="row">
     <div class="col-sm-4">
       <div class="panel panel-default">
-        <div class="panel-heading">
-            Games
-        </div>
+        <!-- <div class="panel-heading">
+        </div> -->
         <div class="panel-body">
+          <div>
+            <ul class="nav nav-pills game-type-option">
+              <li role="presentation" ng-click="changeGameFilter('open')" ng-class="{ active: gamesFilter == 'open' }"><a href="#">Open Games</a></li>
+              <li role="presentation" ng-click="changeGameFilter('archive')" ng-class="{ active: gamesFilter == 'archive' }"><a href="#">Archive</a></li>
+            </ul>
+          </div>
           <div class="list-group">
-            <a ng-repeat="game in games" ng-click="selectGame($index)" ng-class="{active: games[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }} - {{ game.status }}
+            <a ng-repeat="game in gameList" ng-click="selectGame($index)" ng-class="{active: gameList[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }} - {{ game.status }}
             <span class="badge">{{ game.players.length }}</span>
             </a>
           </div>

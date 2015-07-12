@@ -11,16 +11,34 @@ angular.module('j9dl')
   		if($scope.selectedGameId) {
   			loadSelectedGameDetails();
   		}
-  		refreshGamesList();
+  		refreshGameList();
   	}, pollingTime);
 
   	var setError = function(err) {
  		$scope.error = err;
  	};
 
- 	var refreshGamesList = function() {
+ 	var refreshGameList = function() {
+
 	 	game.list(function(games) {
-	 		$scope.games = games;
+
+	 		var openGames = [];
+	 		var archivedGames = [];
+
+	 		games.forEach(function(game) {
+	 			if(game.status == 'Complete') {
+	 				archivedGames.push(game);
+	 			} else {
+	 				openGames.push(game);
+	 			}
+	 		});
+
+	 		if($scope.gamesFilter == 'open') {
+	 			$scope.gameList = openGames;
+	 		} else {
+	 			$scope.gameList = archivedGames;
+	 		}
+
 	 	}, setError);
 	};
 
@@ -74,7 +92,7 @@ angular.module('j9dl')
  		game.voteResult($scope.selectedGameId, vote)
  		.success(function() {
  			loadSelectedGameDetails();
- 			refreshGamesList();
+ 			refreshGameList();
  		})
  		.error(setError);
  	};
@@ -82,13 +100,13 @@ angular.module('j9dl')
  	// exposed scope functions
  	$scope.createGame = function() {
  		game.create(function() {
- 			refreshGamesList();
+ 			refreshGameList();
  		}, setError);
  	};
 
  	$scope.selectGame = function(index) {
  		
- 		$scope.selectedGameId = $scope.games[index]._id;
+ 		$scope.selectedGameId = $scope.gameList[index]._id;
 
  		loadSelectedGameDetails();
  	};
@@ -98,7 +116,7 @@ angular.module('j9dl')
  		.success(function() {
  			reloadUser(function() {
  				loadSelectedGameDetails();
- 				refreshGamesList();
+ 				refreshGameList();
  			});
  		})
  		.error(setError);
@@ -108,7 +126,7 @@ angular.module('j9dl')
  		game.cancel($scope.selectedGameId)
  		.success(function() {
  			clearOptions();
- 			refreshGamesList();
+ 			refreshGameList();
  		})
  		.error(setError);
  	};
@@ -118,7 +136,7 @@ angular.module('j9dl')
  		.success(function() {
  			reloadUser(function() {
  				loadSelectedGameDetails();
- 				refreshGamesList();
+ 				refreshGameList();
  			});
  		})
  		.error(setError);
@@ -129,7 +147,7 @@ angular.module('j9dl')
  		game.begin($scope.selectedGameId)
  		.success(function() {
  			loadSelectedGameDetails();
- 			refreshGamesList();
+ 			refreshGameList();
  		})
  		.error(setError);
  	};
@@ -146,8 +164,16 @@ angular.module('j9dl')
  		voteResult('scratch');
  	};
 
+	$scope.changeGameFilter = function(mode) {
+
+		$scope.gamesFilter = mode;
+		clearOptions();
+		refreshGameList();
+	};
+
  	// init
- 	$scope.games = [];
- 	refreshGamesList();
+ 	$scope.gameList = [];
+ 	$scope.gamesFilter = 'open';
+ 	refreshGameList();
  	reloadUser();
   });
