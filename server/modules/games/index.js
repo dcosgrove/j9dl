@@ -154,9 +154,16 @@ module.exports = function(db, io) {
 	};
 
 	var abortGame = function(game) {
-		return Promise.all(_.map(game.players, removePlayer))
+
+		return game.populateAsync('players')
+		.then(function(game) {
+			return Promise.all(_.map(game.players, function(player) {
+				player.currentGame = null;
+				return player.save();
+			}));
+		})
 		.then(function() {
-			return Game.findByIdAndRemove(game.id);
+			return Game.removeAsync(game);
 		});
 	};
 
@@ -256,9 +263,8 @@ module.exports = function(db, io) {
 	var finalizeGame = function(game, outcome) {
 		
 		if(outcome == 'scratch') {
-			game.status = 'Void';
-			// no score updates needed
-			return game.save();
+			// TODO - maybe save the voided game?? 
+			return abortGame(game);
 		} else {
 			game.status = 'Complete';
 
