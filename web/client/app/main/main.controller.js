@@ -26,14 +26,14 @@ angular.module('j9dl')
 	 		var archivedGames = [];
 
 	 		games.forEach(function(game) {
-	 			if(game.status == 'Complete') {
+	 			if(game.status === 'Complete') {
 	 				archivedGames.push(game);
 	 			} else {
 	 				openGames.push(game);
 	 			}
 	 		});
 
-	 		if($scope.gamesFilter == 'open') {
+	 		if($scope.gamesFilter === 'open') {
 	 			$scope.gameList = openGames;
 	 		} else {
 	 			$scope.gameList = archivedGames;
