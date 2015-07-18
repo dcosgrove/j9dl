@@ -1,27 +1,12 @@
 var Promise = require('bluebird');
 var bcrypt = require('bcrypt');
+var SteamStrategy = require('passport-steam').Strategy;
+var findOrCreate = require('mongoose-findorcreate');
 
 // users
-module.exports = function(db, io) {
+module.exports = function(db, io, passport) {
 
 	var userSchema = db.Schema({
-		username: { 
-			type: String,
-			unique: true, 
-			required: true, 
-			validate: function(s) {
-				return s && s.length;
-			}
-		},
-		password: { 
-			type: String,
-			select: false,
-			required: true
-		},
-		email: { 
-			type: String, 
-			select: false
-		},
 		createdAt: {
 			type: Date,
 			default: Date.now
@@ -43,76 +28,58 @@ module.exports = function(db, io) {
 				type: Number,
 				default: 25.0 / 3
 			}
+		},
+		steamProfile: {
+			type: db.Schema.Types.Mixed
 		}
 	});
+	userSchema.plugin(findOrCreate);
 
 	var User = db.model('User', userSchema);
 
-	var create = function(fields) {
-	
-		var hash = Promise.promisify(bcrypt.hash);	
-		return hash(fields.password, 8)
-		.then(function(password) {
+	passport.serializeUser(function(user, done) {
+	  	done(null, user.id);
+	});
 
+	passport.deserializeUser(function(id, done) {
+		User.findById(id, function(err, user) {
+			done(err, user);
+		});
+	});
+
+	passport.use(new SteamStrategy({
+	    returnURL: 'http://localhost/j9dl/api/auth/steam/callback',
+	    realm: 'http://localhost/',
+	    apiKey: process.env.STEAM_API_KEY || 'A7D8CF2938F12BB6732994AC5312F9B9'
+	  },
+	  function(identifier, profile, done) {
+	    User.findOrCreate({'steamProfile.id': profile.id}, { steamProfile: profile }, { upsert: true },
+    	function (err, user) {
+	    	if (err) { return done(err); }
+	    	return done(null, user);
+    	});
+	  }
+	));
+
+	var updateSteamFields = function(steamPayload) {
+		var newUser = Promise.promisify(function(steamFields) {
 			var user = new User({
-				username: fields.username,
-				password: password,
-				email: fields.email
+				steam: steamFields
 			});
 
 			return user.save();
-		})
+		});	
+
+		return newUser(steamPayload)
 		.then(function(user) {
 			// reload to get default selection
-			return User.findById(user.id);
+			return User.findById(user.steam.id);
 		});
-	};
-
-	var authenticate = function(fields) {
-
-		var compare = Promise.promisify(bcrypt.compare);
-		
-		return User.findOne({ username: fields.username }).select('password')
-		.then(function(user) {
-
-			if(!user) {
-				throw new Error('Username not found');
-			}
-
-			return compare(fields.password, user.password)
-			.then(function(matches) {
-  				
-  				if(!matches) {
-					throw new Error('Wrong password');
-				}
-
-				// reload here to select all fields 
-				return User.findById(user.id);
-			});
-  		});
 	};
 
 	return {
 
-		create: function(req, res, next) {
-	
-			if(!req.body.username || !req.body.password) {
-				next(new Error('Username and password must be specified'));
-			}
-
-			create(req.body)
-			.then(function(user) {
-				console.log('successfully created user:', req.body.username);
-
-				req.session.user = user.id;
-				res.status(201).json(user);
-			}, function(err) {
-				next(err);
-			});
-		},
-
 		get: function(req, res, next) {
-
 			return User.findById(req.params.id)
 			.then(function(user) {
 				
@@ -137,19 +104,17 @@ module.exports = function(db, io) {
 			});
 		},
 
-		login: function(req, res, next) {
+		passportAuthenticate: passport.authenticate('steam', { failureRedirect: '/j9dl/api/error-auth' }),
 
-			return authenticate(req.body)
-			.then(function(user) {
-				req.session.user = user.id;
-				res.status(200).json(user);
-			}, function(err) {
-				next(err);
-			});
+		steamAuth: function(req, res, next) {
+		  	res.redirect('/j9dl');
+		},
+
+		steamCallback: function(req, res, next) {
+		  	res.redirect('/j9dl');
 		},
 
 		logout: function(req, res, next) {
-
 			req.session.destroy(function(err) {
 				if(err) {
 					return next(err);
@@ -157,15 +122,14 @@ module.exports = function(db, io) {
 					res.status(200).json({});
 				}
 			});
+
+			req.logout();
+			// res.redirect('/j9dl');
 		},
 
 		getSession: function(req, res, next) {
-
-			if(req.session.user) {
-				User.findById(req.session.user)
-				.then(function(user) {
-					res.status(200).json(user);
-				});
+			if(req.user) {
+				res.status(200).json(req.user);
 			} else {
 				// not logged in case
 				res.status(404).json({
