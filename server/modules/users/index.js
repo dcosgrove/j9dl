@@ -47,9 +47,10 @@ module.exports = function(db, io, passport) {
 		});
 	});
 
+	var host = 'http://www.dcosgrove.com';
 	passport.use(new SteamStrategy({
-	    returnURL: 'http://localhost/j9dl/api/auth/steam/callback',
-	    realm: 'http://localhost/',
+	    returnURL: host + '/j9dl/api/auth/steam/callback',
+	    realm: host,
 	    apiKey: process.env.STEAM_API_KEY || 'A7D8CF2938F12BB6732994AC5312F9B9'
 	  },
 	  function(identifier, profile, done) {
