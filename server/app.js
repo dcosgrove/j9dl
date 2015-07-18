@@ -9,6 +9,7 @@ var Session = require('express-session');
 var MongoStore = require('connect-mongo')(Session);
 var mongoose = require('mongoose');
 Promise.promisifyAll(require('mongoose'));
+var passport = require('passport');
 
 var sio = require('socket.io')
 
@@ -59,9 +60,12 @@ dbPromise.then(function(db) {
 	io.on('connection', function(socket) {
 		console.log('sio: user connected');
 	});
+	
+	app.use(passport.initialize());
+	app.use(passport.session());
 
 	// inject db instance to modules
-	return [ modules(db, io), app, server ];
+	return [ modules(db, io, passport), app, server ];
 })
 .spread(function(modules, app, server) {
 
