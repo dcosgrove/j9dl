@@ -3,9 +3,10 @@ module.exports = function(modules) {
 	return {
 		connect: function(router) {
 
-			router.post('/login', modules.users.login);
+			router.get('/auth/steam', modules.users.passportAuthenticate, modules.users.steamAuth);
+			router.get('/auth/steam/callback', modules.users.passportAuthenticate, modules.users.steamCallback);
 			router.get('/logout', modules.users.logout);
-			router.post('/users', modules.users.create);
+			// router.post('/users', modules.users.create);
 			router.get('/users', modules.users.list);
 			router.get('/users/:id', modules.users.get);
 

@@ -12,14 +12,12 @@
     <div>
       <ul class="nav navbar-nav navbar-right">
         <li ng-show="notLoggedIn">
-          <a href="login">Log in</a>
+          <a href="api/auth/steam" target="_self"><img src="http://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_small.png" width="154" height="23" border="0"></a>
         </li>
-        <li ng-show="notLoggedIn">
-          <a href="register">Register</a>
-        </li>
-        <li class="dropdown" ng-show="user">
+        <li class="dropdown" ng-show="user" style="width:300px">
+          <img class="img-rounded" ng-src="{{user.steamProfile.photos[0].value}}" style="float:left;margin-top:8px;margin-right:12px"/>
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
-            {{ user.username }} <span class="caret"></span>
+            {{ user.steamProfile.displayName }} <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
             <!-- <li><a href="#">Account Settings</a></li> -->

@@ -21,7 +21,7 @@
             </ul>
           </div>
           <div class="list-group">
-            <a ng-repeat="game in gameList" ng-click="selectGame($index)" ng-class="{active: gameList[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.username }} - {{ game.status }}
+            <a ng-repeat="game in gameList" ng-click="selectGame($index)" ng-class="{active: gameList[$index]._id == selectedGameId}" href="#" class="list-group-item"> {{ game.creator.steamProfile.displayName }} - {{ game.status }}
             <span class="badge">{{ game.players.length }}</span>
             </a>
           </div>
@@ -32,12 +32,12 @@
     <div class="col-sm-8">
       <div ng-show="selectedGame" class="panel panel-default">
         <div class="panel-heading">
-            <p>Game Creator: {{ selectedGame.creator.username }} | Created at: {{ selectedGame.createdAt }}</p>
+            <p>Game Creator: {{ selectedGame.creator.steamProfile.displayName }} | Created at: {{ selectedGame.createdAt }}</p>
         </div>
         <div ng-show="selectedGame.status == 'Pending'" class="panel-body">
           <ul class="list-group">
             Players
-            <li ng-repeat="player in selectedGame.players" class="list-group-item"> {{ player.username }}
+            <li ng-repeat="player in selectedGame.players" class="list-group-item"> {{ player.steamProfile.displayName }}
               <span class="badge">{{ player.rating.mean | ratingDisplay }}</span>
             </li>
           </ul>
@@ -57,7 +57,7 @@
             <ul class="list-group">
             Team A
               <li ng-repeat="member in selectedGame.teamA" class="list-group-item">
-                {{ member.player.username }}
+                {{ member.player.steamProfile.displayName }}
                 <span class="label label-success">
                   {{ member.stakes.win.mean - member.player.rating.mean | ratingDisplay }}
                 </span>
@@ -72,7 +72,7 @@
             <ul class="list-group">
             Team B
               <li ng-repeat="member in selectedGame.teamB" class="list-group-item">
-                {{ member.player.username }}
+                {{ member.player.steamProfile.displayName }}
                 <span class="label label-success">
                   {{ member.stakes.win.mean - member.player.rating.mean | ratingDisplay }}
                 </span>
@@ -113,7 +113,7 @@
             <ul class="list-group">
             Team A
               <li ng-repeat="member in selectedGame.teamA" class="list-group-item">
-                {{ member.player.username }}
+                {{ member.player.steamProfile.displayName }}
                 <span ng-show="tally.winner == 'A'" class="label label-success">
                   {{ member.stakes.win.mean | ratingDisplay }}
                 </span>
@@ -127,7 +127,7 @@
             <ul class="list-group">
             Team B
               <li ng-repeat="member in selectedGame.teamB" class="list-group-item">
-                {{ member.player.username }}
+                {{ member.player.steamProfile.displayName }}
                 <span ng-show="tally.winner == 'B'"class="label label-success">
                   {{ member.stakes.win.mean | ratingDisplay }}
                 </span>
@@ -155,6 +155,6 @@
 
 <footer class="footer">
   <div class="container">
-      <p><a href="https://www.youtube.com/watch?v=rivFCwwvoh8">Report Bugs Here</a></p> 
+      <p><a href="https://www.youtube.com/watch?v=rivFCwwvoh8">Report Bugs Here</a> | Powered by Steam</p> 
   </div>
 </footer>

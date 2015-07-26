@@ -109,7 +109,6 @@ module.exports = function(db, io) {
 	var User = db.model('User');
 
 	var create = function(fields) {
-
 		return User.findById(fields.creator)
 		.then(function(creator) {
 
@@ -193,7 +192,9 @@ module.exports = function(db, io) {
 	};
 
 	var checkGameParameters = function(game) {
-
+		if(game.players.length < 10) {
+			return false
+		}
 		// TODO - validate game to ensure it's ok to start
 		return true;
 	};
@@ -202,7 +203,6 @@ module.exports = function(db, io) {
 
 		return Game.findById(gameId)
 		.then(function(game) {
-
 			return game.populateAsync('players');
 		})
 		.then(function(game) {
@@ -326,7 +326,7 @@ module.exports = function(db, io) {
 
 			// ensure player is actually in the game they're trying to vote on
 			var isPlaying = _.find(game.players, function(player) {
-				return player == playerId;
+				return player.equals(playerId);
 			});
 
 			if(!isPlaying) {
@@ -340,12 +340,12 @@ module.exports = function(db, io) {
 		.then(function(game) {
 
 			var index = _.findIndex(game.results, function(result) {
-				return playerId == result.player;
+				return playerId.equals(result.player);
 			});	
 
 			if(index >= 0) {
-				// vote changing case - broken right now
-				// game.results[index] = { player: playerId, vote: vote };
+				game.results.splice(index, 1);
+				game.results.push({ player: playerId, vote: vote });
 			} else {
 				// new vote
 				game.results.push({ player: playerId, vote: vote });
@@ -369,13 +369,13 @@ module.exports = function(db, io) {
 
 		create: function(req, res, next) {
 				
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
 			}
 
 			var fields = req.body || {};
-			fields.creator = req.session.user;
-			
+			fields.creator = req.user;
+
 			return create(fields)
 			.then(function(player) {
 				res.status(201).json({
@@ -388,9 +388,9 @@ module.exports = function(db, io) {
 
 		withdraw: function(req, res, next) {
 
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
-			} else if(req.session.user != req.params.user) {
+			} else if(req.user != req.params.user) {
 				// current limitation: player can withdraw themselves only
 				// TODO: admin can do it too
 				next(new Error('Authorization error'));
@@ -406,13 +406,13 @@ module.exports = function(db, io) {
 
 		abort: function(req, res, next) {
 			
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
 			}
 
 			return Game.findById(req.params.id)
 			.then(function(game) {
-				if (game.creator == req.session.user) {
+				if (game.creator.equals(req.user._id)) {
 					return abortGame(game);
 				} else {
 					throw new Error('Authorization error');
@@ -427,11 +427,11 @@ module.exports = function(db, io) {
 
 		join: function(req, res, next) {
 
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
 			}
 
-			return User.findById(req.session.user)
+			return User.findById(req.user)
 			.then(function(user) {
 
 				if(user.currentGame) {
@@ -439,7 +439,7 @@ module.exports = function(db, io) {
 				}
 			})
 			.then(function() {
-				return joinGame(req.params.id, req.session.user);
+				return joinGame(req.params.id, req.user);
 			})
 			.then(function(game) {
 				res.status(200).json({
@@ -451,10 +451,8 @@ module.exports = function(db, io) {
 		},
 
 		get: function(req, res, next) {
-
 			return Game.findById(req.params.id)
 			.then(function(game) {
-				
 				if(!game) {
 					throw new Error('Game not found');
 				}
@@ -482,14 +480,13 @@ module.exports = function(db, io) {
 
 		begin: function(req, res, next) {
 
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
 			}
 
 			return Game.findById(req.params.id)
 			.then(function(game) {
-
-				if(req.session.user == game.creator) {
+				if(game.creator.equals(req.user._id)) {
 					return beginGame(req.params.id);
 				} else {
 					throw new Error('Must be creator');
@@ -504,11 +501,11 @@ module.exports = function(db, io) {
 
 		result: function(req, res, next) {
 			
-			if(!req.session.user) {
+			if(!req.user) {
 				next(new Error('Must be logged in'));
 			}
 
-			return voteGame(req.params.id, req.session.user, req.body.vote)
+			return voteGame(req.params.id, req.user._id, req.body.vote)
 			.then(function(game) {
 				res.status(200).json(game);
 			}, function(err) {
