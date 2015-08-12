@@ -6,18 +6,6 @@ var findOrCreate = require('mongoose-findorcreate');
 // users
 module.exports = function(db, io, passport) {
 
-	var pSchema = db.Schema({
-		username: { 
-			type: String,
-			unique: true, 
-			required: true
-		},
-		password: { 
-			type: String,
-			required: true
-		}
-	});
-
 	var userSchema = db.Schema({
 		createdAt: {
 			type: Date,
@@ -45,6 +33,7 @@ module.exports = function(db, io, passport) {
 			type: db.Schema.Types.Mixed
 		}
 	});
+
 	userSchema.plugin(findOrCreate);
 
 	var User = db.model('User', userSchema);
@@ -121,11 +110,11 @@ module.exports = function(db, io, passport) {
 		passportAuthenticate: passport.authenticate('steam', { failureRedirect: '/j9dl/api/error-auth' }),
 
 		steamAuth: function(req, res, next) {
-		  	res.redirect('/j9dl');
+		  	res.redirect('/j9dl/');
 		},
 
 		steamCallback: function(req, res, next) {
-		  	res.redirect('/j9dl');
+		  	res.redirect('/j9dl/');
 		},
 
 		logout: function(req, res, next) {
