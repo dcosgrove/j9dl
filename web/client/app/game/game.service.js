@@ -42,6 +42,10 @@ angular.module('j9dl')
       return $http.delete('api/games/' + game + '/players/' + player);
     },
 
+    forbid: function(game, player) {
+      return $http.post('api/games/' + game + '/forbids/' + player);
+    },
+
     begin: function(id) {
       return $http.post('api/games/' + id + '/begin');
     },

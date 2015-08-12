@@ -20,6 +20,10 @@ module.exports = function(modules) {
 			router.post('/games/:id/result', modules.games.result);
 
 			router.post('/games/:id/players', modules.games.join);
+
+			router.post('/games/:id/forbids/:user', modules.games.forbid);
+			// router.delete('/games/:id/forbids/:user', modules.games.unforbid);
+
 			router.delete('/games/:id/players/:user', modules.games.withdraw);
 			router.delete('/games/:id', modules.games.abort);
 		}

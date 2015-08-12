@@ -141,6 +141,17 @@ angular.module('j9dl')
  		})
  		.error(setError);
  	};
+user
+ 	$scope.forbidPlayer = function(userId) {
+ 		game.forbid($scope.selectedGameId, userId)
+ 		.success(function() {
+ 			reloadUser(function() {
+ 				loadSelectedGameDetails();
+ 				refreshGameList();
+ 			});
+ 		})
+ 		.error(setError);
+ 	};
 
  	$scope.startGame = function() {
 

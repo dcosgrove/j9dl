@@ -60,6 +60,7 @@ module.exports = function(db, io, passport) {
 	});
 
 	var host = 'http://www.dcosgrove.com';
+	// var host = 'http://localhost';
 	passport.use(new SteamStrategy({
 	    returnURL: host + '/j9dl/api/auth/steam/callback',
 	    realm: host,

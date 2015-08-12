@@ -18,6 +18,10 @@ module.exports = function(db, io) {
 			type:  db.Schema.ObjectId ,
 			ref: 'User'
 		}],
+		forbids: [{ 
+			type:  db.Schema.ObjectId ,
+			ref: 'User'
+		}],
 		teamA: [{
 			player: {
 				type:  db.Schema.ObjectId,
@@ -131,6 +135,27 @@ module.exports = function(db, io) {
 		});
 	};
 
+	var forbidPlayer = function(player, caller) {
+
+		return User.findById(player)
+		.then(function(user) {
+			return Game.findById(user.currentGame)
+			.then(function(game) {
+				if (!game.creator.equals(caller._id)) {
+					throw new Error('Must be host to forbid');
+				}
+
+				if (game.players.indexOf(player) !== -1) game.players.remove(player);
+				if (game.forbids.indexOf(player) === -1) game.forbids.push(player);
+				return game.save();
+			})
+			.then(function() {
+				user.currentGame = null;
+				return user.save();
+			});
+		});
+	};
+
 	var removePlayer = function(player) {
 
 		return User.findById(player)
@@ -171,9 +196,10 @@ module.exports = function(db, io) {
 		// TODO - more restrictions here
 		return Game.findById(game)
 		.then(function(game) {
-
-			if(game.players.length >= 10) {
+			if (game.players.length >= 10) {
 				throw new Error('Game is full');
+			} else if (game.forbids.indexOf(player._id) !== -1) {
+				throw new Error('You have been forbidden to join this game');
 			}
 
 			game.players.push(player);
@@ -404,6 +430,20 @@ module.exports = function(db, io) {
 			});
 		},
 
+		forbid: function(req, res, next) {
+
+			if(!req.user) {
+				next(new Error('Must be logged in'));
+			}
+
+			return forbidPlayer(req.params.user, req.user)
+			.then(function() {
+				res.status(200).json({});
+			}, function(err) {
+				next(err);
+			});
+		},
+
 		abort: function(req, res, next) {
 			
 			if(!req.user) {
@@ -433,7 +473,6 @@ module.exports = function(db, io) {
 
 			return User.findById(req.user)
 			.then(function(user) {
-
 				if(user.currentGame) {
 					throw new Error('Unable to join, leave your current game first');
 				}
